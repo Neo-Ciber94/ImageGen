@@ -18,10 +18,15 @@ export default function Home() {
           <GenerateSearchBar />
         </div>
 
-        <div className="grid grid-cols-4 gap-10 px-8 pb-2 pt-6">
+        <div className="grid grid-cols-2 gap-2 px-8 pb-2 pt-6 md:gap-6 lg:grid-cols-4">
           {images.map((img, idx) => {
             return (
-              <div key={idx} className={`mb-auto relative ${idx % 6 === 0 ? "col-span-2": ""}`}>
+              <div
+                key={idx}
+                className={`relative mb-auto ${
+                  idx % 6 === 0 ? "col-span-2" : ""
+                }`}
+              >
                 <img
                   className="h-full w-full object-contain"
                   alt={img}
