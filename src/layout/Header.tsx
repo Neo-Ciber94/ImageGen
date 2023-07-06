@@ -1,5 +1,5 @@
 import { SignOutButton, useUser } from "@clerk/nextjs";
-import { UserResource } from "@clerk/types";
+import { type UserResource } from "@clerk/types";
 import { Lato } from "next/font/google";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -14,8 +14,6 @@ export default function Header() {
   const router = useRouter();
   const { isLoaded, isSignedIn, user } = useUser();
 
-  console.log({ user });
-
   return (
     <header className="flex flex-row justify-between border-b border-gray-300/50 px-4 py-4 text-purple-600 shadow-md">
       <Link href="/" className="flex flex-row items-center">
@@ -24,7 +22,7 @@ export default function Header() {
           className="flex flex-row font-mono text-xl font-bold"
           style={font.style}
         >
-          ImageGen Gallery
+          ImageGen
         </div>
       </Link>
 

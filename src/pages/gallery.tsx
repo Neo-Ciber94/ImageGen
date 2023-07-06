@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import Head from "next/head";
 import GenerateSearchBar from "~/components/GenerateSearchBar";
 import { api } from "~/utils/api";
@@ -10,7 +9,7 @@ export default function GalleryPage() {
   return (
     <>
       <Head>
-        <title>Image Generator</title>
+        <title>ImageGen Gallery</title>
       </Head>
 
       <div className="relative p-4">
@@ -18,7 +17,7 @@ export default function GalleryPage() {
           <GenerateSearchBar />
         </div>
 
-        <div className="grid grid-cols-2 gap-2 px-8 pb-2 pt-6 md:gap-6 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 px-8 pb-2 pt-6 md:gap-6 lg:grid-cols-5">
           {images.map((img, idx) => {
             return (
               <div
