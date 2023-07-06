@@ -28,6 +28,6 @@
     "**/*.tsx",
     "**/*.cjs",
     "**/*.mjs"
-  ],
+, "src/server/db/migration.cts"  ],
   "exclude": ["node_modules"]
 }

@@ -13,7 +13,8 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: z.string(),
     OPEN_API_KEY: z.string(),
     AWS_ACCESS_KEY_ID: z.string(),
-    AWS_SECRET_KEY: z.string()
+    AWS_SECRET_KEY: z.string(),
+    AWS_BUCKET_NAME: z.string()
   },
 
   /**
@@ -36,7 +37,8 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     OPEN_API_KEY: process.env.OPEN_API_KEY,
     AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
-    AWS_SECRET_KEY: process.env.AWS_SECRET_KEY
+    AWS_SECRET_KEY: process.env.AWS_SECRET_KEY,
+    AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
