@@ -5,6 +5,7 @@ import { useCallback } from "react";
 const searchBarAtom = atom("");
 
 export function useSetSearchTerm() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setText] = useAtom(searchBarAtom);
 
   const setRandomSearchTerm = useCallback(() => {
