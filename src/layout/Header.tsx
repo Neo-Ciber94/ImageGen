@@ -4,6 +4,7 @@ import { Lato } from "next/font/google";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { BiImage } from "react-icons/bi";
+import LoadingIndicator from "~/components/LoadingIndicator";
 
 const font = Lato({
   weight: ["700"],
@@ -36,7 +37,7 @@ export default function Header() {
           </SignOutButton>
         )}
 
-        {!isLoaded && <span>Loading...</span>}
+        {!isLoaded && <LoadingIndicator />}
         {user && <UserAvatar user={user} />}
       </div>
     </header>
