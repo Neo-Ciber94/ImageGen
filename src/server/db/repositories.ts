@@ -1,22 +1,25 @@
 import { type InferModel, eq, and } from "drizzle-orm";
 import { db } from "./drizzle";
-import { generatedImage, userAccount } from "drizzle/schema";
+import { generatedImages, userAccounts } from "drizzle/schema";
+import { clerkClient } from "@clerk/nextjs";
 
-export type GeneratedImage = InferModel<typeof generatedImage>;
+export type GeneratedImageModel = InferModel<typeof generatedImages>;
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace UserAccounts {
     export async function getOrCreateUserAccount(userId: string) {
         const userAccountResults = await db.select()
-            .from(userAccount)
-            .where(eq(userAccount.userId, userId));
+            .from(userAccounts)
+            .where(eq(userAccounts.userId, userId));
 
         if (userAccountResults.length >= 1) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             return userAccountResults[0]!;
         }
 
-        const result = await db.insert(userAccount).values({ userId }).returning();
+        const user = await clerkClient.users.getUser(userId);
+        const userName = user.username || user.emailAddresses[0]?.emailAddress || user.firstName;
+        const result = await db.insert(userAccounts).values({ userId, userName }).returning();
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-non-null-assertion
         return result[0]!;
     }
@@ -25,16 +28,16 @@ export namespace UserAccounts {
         if (count <= 0) {
             throw new Error("count to decrement should be greater than zero");
         }
-        
+
         const result = await UserAccounts.getOrCreateUserAccount(userId);
 
         if (result.imageGenerationTokens <= 0) {
             return;
         }
 
-        await db.update(userAccount)
+        await db.update(userAccounts)
             .set({ imageGenerationTokens: result.imageGenerationTokens - count })
-            .where(eq(userAccount.userId, userId));
+            .where(eq(userAccounts.userId, userId));
     }
 }
 
@@ -42,25 +45,25 @@ export namespace UserAccounts {
 export namespace GeneratedImages {
     export async function getAllImages(userId: string) {
         const userAccount = await UserAccounts.getOrCreateUserAccount(userId);
-        const images = await db.select().from(generatedImage).where(eq(generatedImage.userAccountId, userAccount.id));
+        const images = await db.select().from(generatedImages).where(eq(generatedImages.userAccountId, userAccount.id));
         return images;
     }
 
-    export async function saveGeneratedImages(userId: string, data: Pick<GeneratedImage, 'key' | 'prompt'>[]) {
+    export async function saveGeneratedImages(userId: string, data: Pick<GeneratedImageModel, 'key' | 'prompt'>[]) {
         const userAccount = await UserAccounts.getOrCreateUserAccount(userId);
 
         const input = data.map(x => ({ ...x, userAccountId: userAccount.id }));
-        const result = await db.insert(generatedImage).values(input).returning();
+        const result = await db.insert(generatedImages).values(input).returning();
         return result;
     }
 
     export async function deleteImage(userId: string, generatedImageId: number) {
         const userAccount = await UserAccounts.getOrCreateUserAccount(userId);
-        const deleted = await db.delete(generatedImage)
+        const deleted = await db.delete(generatedImages)
             .where(
                 and(
-                    eq(generatedImage.id, generatedImageId),
-                    eq(generatedImage.userAccountId, userAccount.id)
+                    eq(generatedImages.id, generatedImageId),
+                    eq(generatedImages.userAccountId, userAccount.id)
                 )
             )
             .returning();

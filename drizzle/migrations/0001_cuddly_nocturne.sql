@@ -1,0 +1,1 @@
+ALTER TABLE "userAccount" ADD COLUMN "userName" text;
