@@ -14,7 +14,9 @@ export const env = createEnv({
     OPEN_API_KEY: z.string(),
     AWS_ACCESS_KEY_ID: z.string(),
     AWS_SECRET_KEY: z.string(),
-    AWS_BUCKET_NAME: z.string()
+    AWS_BUCKET_NAME: z.string(),
+    CLERK_SECRET_KEY: z.string(),
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string(),
   },
 
   /**
@@ -22,9 +24,7 @@ export const env = createEnv({
    * isn't built with invalid env vars. To expose them to the client, prefix them with
    * `NEXT_PUBLIC_`.
    */
-  client: {
-    
-  },
+  client: {},
 
   /**
    * You can't destruct `process.env` as a regular object in the Next.js edge runtimes (e.g.
@@ -38,7 +38,9 @@ export const env = createEnv({
     OPEN_API_KEY: process.env.OPEN_API_KEY,
     AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
     AWS_SECRET_KEY: process.env.AWS_SECRET_KEY,
-    AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME
+    AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME,
+    CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.

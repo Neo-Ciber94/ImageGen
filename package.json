@@ -4,11 +4,15 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "sst bind next dev",
+    "dev": "npx dotenv -e .env -v SKIP_ENV_VALIDATION=true -- sst bind next dev",
     "lint": "next lint",
     "start": "next start",
     "drizzle:generate": "drizzle-kit generate:pg --out drizzle/migrations --schema drizzle/schema.ts",
-    "drizzle:migrate": "npx dotenv -e .env -- node drizzle/migrate.mjs"
+    "drizzle:migrate": "npx dotenv -e .env -- node drizzle/migrate.mjs",
+    "next:dev": "next dev",
+    "sst:dev": "npx dotenv -e .env -v SKIP_ENV_VALIDATION=true -- npx sst dev",
+    "sst:deploy": "npx dotenv -e .env.production -v SKIP_ENV_VALIDATION=true -- npx sst deploy --stage prod",
+    "sst:remove": "npx dotenv -e .env.production -v SKIP_ENV_VALIDATION=true -- npx sst remove"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.363.0",
@@ -44,6 +48,8 @@
     "@typescript-eslint/eslint-plugin": "^5.59.6",
     "@typescript-eslint/parser": "^5.59.6",
     "autoprefixer": "^10.4.14",
+    "aws-cdk-lib": "2.84.0",
+    "constructs": "10.1.156",
     "dotenv-cli": "^7.2.1",
     "drizzle-kit": "^0.19.3",
     "eslint": "^8.40.0",
@@ -51,12 +57,10 @@
     "postcss": "^8.4.21",
     "prettier": "^2.8.8",
     "prettier-plugin-tailwindcss": "^0.2.8",
+    "sst": "^2.19.1",
     "tailwindcss": "^3.3.0",
     "tsx": "^3.12.7",
-    "typescript": "^5.0.4",
-    "sst": "^2.19.1",
-    "aws-cdk-lib": "2.84.0",
-    "constructs": "10.1.156"
+    "typescript": "^5.0.4"
   },
   "ct3aMetadata": {
     "initVersion": "7.15.0"
