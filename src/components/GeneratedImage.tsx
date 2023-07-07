@@ -1,13 +1,19 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { MdDelete } from "react-icons/md";
+import { type GeneratedImageModel } from "~/server/db/repositories";
+
+type GeneratedImageType = Pick<
+  GeneratedImageModel,
+  "id" | "prompt" | "createdAt"
+> & { url: string };
 
 export interface GeneratedImageProps {
-  src: string;
+  img: GeneratedImageType;
   onDelete: () => Promise<void>;
 }
 
-export default function GeneratedImage({ src, onDelete }: GeneratedImageProps) {
+export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -20,8 +26,8 @@ export default function GeneratedImage({ src, onDelete }: GeneratedImageProps) {
         >
           <Image
             className="h-full w-full object-contain"
-            alt={src}
-            src={src}
+            alt={img.prompt}
+            src={img.url}
             width={512}
             height={512}
           />
@@ -30,7 +36,8 @@ export default function GeneratedImage({ src, onDelete }: GeneratedImageProps) {
 
       {open && (
         <FullscreenImage
-          src={src}
+          url={img.url}
+          prompt={img.prompt}
           onDelete={onDelete}
           onClose={() => setOpen(false)}
         />
@@ -40,12 +47,18 @@ export default function GeneratedImage({ src, onDelete }: GeneratedImageProps) {
 }
 
 interface FullscreenImageProps {
-  src: string;
+  url: string;
+  prompt: string;
   onClose: () => void;
   onDelete: () => Promise<void>;
 }
 
-function FullscreenImage({ src, onClose, onDelete }: FullscreenImageProps) {
+function FullscreenImage({
+  url,
+  prompt,
+  onClose,
+  onDelete,
+}: FullscreenImageProps) {
   useEffect(() => {
     document.body.style.overflow = "hidden";
 
@@ -94,11 +107,23 @@ function FullscreenImage({ src, onClose, onDelete }: FullscreenImageProps) {
           width={0}
           height={0}
           sizes="100vw"
-          alt={src}
-          src={src}
+          alt={prompt}
+          src={url}
           onClick={(e) => e.stopPropagation()}
         />
       </div>
+
+      <p
+        className="lg:max-fit absolute inset-x-0 bottom-6 left-1/2 max-h-8 w-10/12 -translate-x-1/2 
+      rotate-1 cursor-pointer text-ellipsis rounded-xl bg-white p-2 text-center font-mono
+       text-sm transition-all duration-200 selection:bg-violet-400
+       selection:text-white hover:max-h-[300px] md:w-fit
+      "
+        title={prompt}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {prompt.toLowerCase()}
+      </p>
     </div>
   );
 }

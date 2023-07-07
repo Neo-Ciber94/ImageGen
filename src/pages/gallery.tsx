@@ -73,19 +73,19 @@ export default function GalleryPage() {
           </h1>
         )}
 
-        <div className="grid grid-cols-2 gap-2 px-8 pb-2 pt-6 md:gap-6 lg:grid-cols-5">
+        <div className="grid  grid-flow-row-dense grid-cols-2 gap-2 px-8 pb-2 pt-6 md:gap-6 lg:grid-cols-5">
           {images &&
             images.map((data, idx) => {
               return (
                 <div
                   key={idx}
                   className={`relative mb-auto ${
-                    idx % 6 === 0 ? "col-span-2" : ""
+                    idx % 3 === 0 ? "col-span-2 row-span-2" : ""
                   }`}
                   ref={idx === images.length - 1 ? lastElementRef : undefined}
                 >
                   <GeneratedImage
-                    src={data.url}
+                    img={data}
                     onDelete={() => handleDelete(data.id)}
                   />
                 </div>

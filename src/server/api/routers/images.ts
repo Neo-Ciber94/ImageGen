@@ -6,6 +6,7 @@ import { getImageUrl, uploadFiles } from '~/server/common/fileManager';
 import { GeneratedImages, UserAccounts } from '~/server/db/repositories';
 
 const IMAGE_COUNT = 1;
+const MAX_PROMPT_LENGTH = 400;
 
 export const imagesRouter = createTRPCRouter({
   // Get all images
@@ -18,7 +19,7 @@ export const imagesRouter = createTRPCRouter({
 
   // Generate a new image
   generateImage: protectedProcedure.input(z.object({
-    prompt: z.string().trim().min(3)
+    prompt: z.string().trim().min(3).max(MAX_PROMPT_LENGTH)
   })).mutation(async ({ input: { prompt }, ctx }) => {
 
     try {

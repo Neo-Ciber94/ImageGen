@@ -47,6 +47,7 @@ export default function GenerateSearchBar({
           className="w-full outline-none placeholder:italic "
           placeholder="Generate or search..."
           value={text}
+          disabled={generateImage.isLoading}
           onInput={(e) => {
             const newText = e.currentTarget.value;
             setText(newText);
@@ -61,7 +62,8 @@ export default function GenerateSearchBar({
       {text.length > 0 && (
         <button
           onClick={() => void handleGenerate()}
-          className="px-8 text-gray-500 transition duration-300 hover:bg-black hover:text-white"
+          disabled={generateImage.isLoading}
+          className={`px-8 text-gray-500 transition duration-300 hover:bg-black hover:text-white disabled:bg-black`}
         >
           Generate
         </button>
