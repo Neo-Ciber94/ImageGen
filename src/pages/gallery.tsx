@@ -5,10 +5,26 @@ import GenerateSearchBar, {
 import { api } from "~/utils/api";
 import GeneratedImage from "~/components/GeneratedImage";
 import LoadingIndicator from "~/components/LoadingIndicator";
+import { toast } from "react-hot-toast";
 
 export default function GalleryPage() {
-  const { data: images, isLoading, error } = api.images.getAll.useQuery();
+  const apiContext = api.useContext();
   const setRandomSearchTerm = useSetSearchTerm();
+  const { data: images, isLoading, error } = api.images.getAll.useQuery();
+  const deleteImage = api.images.deleteImage.useMutation({
+    async onSuccess() {
+      await apiContext.images.getAll.invalidate();
+    },
+  });
+
+  const handleDelete = async (id: number) => {
+    await toast.promise(deleteImage.mutateAsync({ id }), {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+      error: (err) => err?.message ?? "Something went wrong",
+      loading: "Loading...",
+      success: "Image deleted successfully",
+    });
+  };
 
   return (
     <>
@@ -53,7 +69,10 @@ export default function GalleryPage() {
                     idx % 6 === 0 ? "col-span-2" : ""
                   }`}
                 >
-                  <GeneratedImage src={data.url} />
+                  <GeneratedImage
+                    src={data.url}
+                    onDelete={() => handleDelete(data.id)}
+                  />
                 </div>
               );
             })}

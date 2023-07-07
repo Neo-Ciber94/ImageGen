@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, type PutObjectCommandOutput } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, type PutObjectCommandOutput, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "~/env.mjs";
 import { nanoid } from 'nanoid';
 
@@ -60,6 +60,15 @@ export async function uploadFiles(contentToUpload: Blob[], opts: UploadFilesOpti
 
     console.log(`${urls.length} files uploaded successfully`, urls);
     return urls;
+}
+
+export async function deleteFile(key: string) {
+    const command = new DeleteObjectCommand({
+        Bucket: env.AWS_BUCKET_NAME,
+        Key: key,
+    });
+
+    await s3Client.send(command);
 }
 
 // host:image-gen-generated-images.s3.us-east-1.amazonaws.com

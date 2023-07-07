@@ -6,12 +6,15 @@ import { getImageUrl, uploadFiles } from '~/server/common/fileManager';
 import { GeneratedImages } from '~/server/db/repositories';
 
 export const imagesRouter = createTRPCRouter({
+  // Get all images
   getAll: protectedProcedure
-    .output(z.array(z.object({ url: z.string(), prompt: z.string(), createdAt: z.date() })))
+    .output(z.array(z.object({ id: z.number(), url: z.string(), prompt: z.string(), createdAt: z.date() })))
     .query(async ({ ctx }) => {
       const generatedImagesResult = await GeneratedImages.getAllImages(ctx.user.id);
       return generatedImagesResult.map(x => ({ ...x, url: getImageUrl(x.key) }))
     }),
+
+  // Generate a new image
   generateImage: protectedProcedure.input(z.object({
     prompt: z.string().trim().min(3)
   })).mutation(async ({ input: { prompt }, ctx }) => {
@@ -49,6 +52,19 @@ export const imagesRouter = createTRPCRouter({
         message
       })
     }
-  })
+  }),
+
+  // Delete image
+  deleteImage: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input: { id }, ctx }) => {
+      const result = await GeneratedImages.deleteImage(ctx.user.id, id);
+
+      if (result == null) {
+        throw new TRPCError({ code: 'NOT_FOUND' });
+      }
+
+      return result;
+    })
 });
 

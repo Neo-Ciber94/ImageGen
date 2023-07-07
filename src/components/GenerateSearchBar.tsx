@@ -42,19 +42,22 @@ export default function GenerateSearchBar({ onChange }: InputSearchBarProps) {
 
   const handleGenerate = async () => {
     const run = async () => {
-      return await generateImage.mutateAsync({ prompt: text}, {
-        async onSuccess(){
-          setText("");
-          await apiContext.images.getAll.invalidate();
+      return await generateImage.mutateAsync(
+        { prompt: text },
+        {
+          async onSuccess() {
+            setText("");
+            await apiContext.images.getAll.invalidate();
+          },
         }
-      })
-    }
+      );
+    };
 
     const t = await toast.promise(run(), {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-      error: err => err?.message ?? "Something went wrong",
+      error: (err) => err?.message ?? "Something went wrong",
       loading: "Loading...",
-      success: "Image generated"
+      success: "Image generated",
     });
 
     console.log(t);
@@ -74,6 +77,11 @@ export default function GenerateSearchBar({ onChange }: InputSearchBarProps) {
             setText(newText);
             if (onChange) {
               onChange(newText);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              void handleGenerate();
             }
           }}
         />

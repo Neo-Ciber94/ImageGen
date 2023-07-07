@@ -1,4 +1,4 @@
-import { type InferModel, eq } from "drizzle-orm";
+import { type InferModel, eq, and } from "drizzle-orm";
 import { db } from "./drizzle";
 import { generatedImage, userAccount } from "drizzle/schema";
 
@@ -36,5 +36,19 @@ export namespace GeneratedImages {
         const input = data.map(x => ({ ...x, userAccountId: userAccount.id }));
         const result = await db.insert(generatedImage).values(input).returning();
         return result;
+    }
+
+    export async function deleteImage(userId: string, generatedImageId: number) {
+        const userAccount = await UserAccounts.getOrCreateUserAccount(userId);
+        const deleted = await db.delete(generatedImage)
+            .where(
+                and(
+                    eq(generatedImage.id, generatedImageId),
+                    eq(generatedImage.userAccountId, userAccount.id)
+                )
+            )
+            .returning();
+
+        return deleted[0];
     }
 }
