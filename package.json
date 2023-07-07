@@ -4,12 +4,12 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "npx dotenv -e .env -v SKIP_ENV_VALIDATION=true -- sst bind next dev",
+    "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
     "drizzle:generate": "drizzle-kit generate:pg --out drizzle/migrations --schema drizzle/schema.ts",
     "drizzle:migrate": "npx dotenv -e .env -- node drizzle/migrate.mjs",
-    "next:dev": "next dev",
+    "sst:run": "npx dotenv -e .env -v SKIP_ENV_VALIDATION=true -- sst bind next dev",
     "sst:dev": "npx dotenv -e .env -v SKIP_ENV_VALIDATION=true -- npx sst dev",
     "sst:deploy": "npx dotenv -e .env.production -v SKIP_ENV_VALIDATION=true -- npx sst deploy --stage prod",
     "sst:remove": "npx dotenv -e .env.production -v SKIP_ENV_VALIDATION=true -- npx sst remove"
