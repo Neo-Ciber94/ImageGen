@@ -3,7 +3,9 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { TRPCError } from '@trpc/server';
 import { generateImages, moderateContent } from '~/server/common/ai';
 import { getImageUrl, uploadFiles } from '~/server/common/fileManager';
-import { GeneratedImages } from '~/server/db/repositories';
+import { GeneratedImages, UserAccounts } from '~/server/db/repositories';
+
+const IMAGE_COUNT = 1;
 
 export const imagesRouter = createTRPCRouter({
   // Get all images
@@ -20,6 +22,15 @@ export const imagesRouter = createTRPCRouter({
   })).mutation(async ({ input: { prompt }, ctx }) => {
 
     try {
+      const userAccount = await UserAccounts.getOrCreateUserAccount(ctx.user.id);
+
+      if (!userAccount.isUnlimited && userAccount.imageGenerationTokens <= 0) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'User do not have enough tokens to generate images'
+        })
+      }
+
       const moderation = await moderateContent(prompt);
 
       if (moderation.isFlagged) {
@@ -29,7 +40,7 @@ export const imagesRouter = createTRPCRouter({
         });
       }
 
-      const images = await generateImages({ prompt, count: 1, userId: ctx.user.id });
+      const images = await generateImages({ prompt, count: IMAGE_COUNT, userId: ctx.user.id });
       const blobs = images.map(img => img.blob);
       const imageResult = await uploadFiles(blobs, {
         metadata: {
@@ -41,6 +52,12 @@ export const imagesRouter = createTRPCRouter({
       // Add generated images to the user
       const input = imageResult.map(x => ({ key: x.key, prompt }));
       await GeneratedImages.saveGeneratedImages(ctx.user.id, input)
+
+      if (!userAccount.isUnlimited) {
+      // Decrement tokens count
+      await UserAccounts.decrementTokenCount(ctx.user.id, IMAGE_COUNT);
+      }
+
       return imageResult.map(x => x.url);
     }
     catch (err) {

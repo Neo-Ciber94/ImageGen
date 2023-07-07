@@ -20,6 +20,22 @@ export namespace UserAccounts {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-non-null-assertion
         return result[0]!;
     }
+
+    export async function decrementTokenCount(userId: string, count: number) {
+        if (count <= 0) {
+            throw new Error("count to decrement should be greater than zero");
+        }
+        
+        const result = await UserAccounts.getOrCreateUserAccount(userId);
+
+        if (result.imageGenerationTokens <= 0) {
+            return;
+        }
+
+        await db.update(userAccount)
+            .set({ imageGenerationTokens: result.imageGenerationTokens - count })
+            .where(eq(userAccount.userId, userId));
+    }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-namespace

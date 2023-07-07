@@ -32,10 +32,12 @@ export function useSetSearchTerm() {
 }
 
 export interface InputSearchBarProps {
-  onChange?: (s: string) => void;
+  afterGenerate?: () => void;
 }
 
-export default function GenerateSearchBar({ onChange }: InputSearchBarProps) {
+export default function GenerateSearchBar({
+  afterGenerate,
+}: InputSearchBarProps) {
   const generateImage = api.images.generateImage.useMutation();
   const apiContext = api.useContext();
   const [text, setText] = useAtom(searchBarAtom);
@@ -47,6 +49,7 @@ export default function GenerateSearchBar({ onChange }: InputSearchBarProps) {
         {
           async onSuccess() {
             setText("");
+            afterGenerate?.();
             await apiContext.images.getAll.invalidate();
           },
         }
@@ -75,9 +78,6 @@ export default function GenerateSearchBar({ onChange }: InputSearchBarProps) {
           onInput={(e) => {
             const newText = e.currentTarget.value;
             setText(newText);
-            if (onChange) {
-              onChange(newText);
-            }
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {

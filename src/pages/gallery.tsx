@@ -6,11 +6,13 @@ import { api } from "~/utils/api";
 import GeneratedImage from "~/components/GeneratedImage";
 import LoadingIndicator from "~/components/LoadingIndicator";
 import { toast } from "react-hot-toast";
+import { useEffect, useRef } from "react";
 
 export default function GalleryPage() {
   const apiContext = api.useContext();
   const setRandomSearchTerm = useSetSearchTerm();
   const { data: images, isLoading, error } = api.images.getAll.useQuery();
+  const lastElementRef = useRef<HTMLDivElement | null>(null);
   const deleteImage = api.images.deleteImage.useMutation({
     async onSuccess() {
       await apiContext.images.getAll.invalidate();
@@ -18,12 +20,16 @@ export default function GalleryPage() {
   });
 
   const handleDelete = async (id: number) => {
-    await toast.promise(deleteImage.mutateAsync({ id }), {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-      error: (err) => err?.message ?? "Something went wrong",
-      loading: "Loading...",
-      success: "Image deleted successfully",
-    });
+    try {
+      await toast.promise(deleteImage.mutateAsync({ id }), {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+        error: (err) => err?.message ?? "Something went wrong",
+        loading: "Deleting...",
+        success: "Image deleted successfully",
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -34,7 +40,13 @@ export default function GalleryPage() {
 
       <div className="relative p-4">
         <div className="sticky inset-x-0 top-8 z-10 w-full px-10 py-2">
-          <GenerateSearchBar />
+          <GenerateSearchBar
+            afterGenerate={() => {
+              if (lastElementRef.current) {
+                lastElementRef.current.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+          />
         </div>
 
         {isLoading && (
@@ -68,6 +80,7 @@ export default function GalleryPage() {
                   className={`relative mb-auto ${
                     idx % 6 === 0 ? "col-span-2" : ""
                   }`}
+                  ref={idx === images.length - 1 ? lastElementRef : undefined}
                 >
                   <GeneratedImage
                     src={data.url}
