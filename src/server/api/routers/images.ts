@@ -19,7 +19,7 @@ export const imagesRouter = createTRPCRouter({
       throw new TRPCError({
         code: 'BAD_REQUEST',
         message: "The given prompt had been flagged as invalid"
-      })
+      });
     }
 
     const images = await generateImages({ prompt, count: 1, userId: ctx.user.id });

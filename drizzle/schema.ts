@@ -1,8 +1,6 @@
-import { pgSchema, integer, serial, text, uniqueIndex, boolean, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, integer, serial, text, uniqueIndex, boolean, timestamp } from 'drizzle-orm/pg-core';
 
-const imageGenSchema = pgSchema('imageGen');
-
-export const userAccount = imageGenSchema.table('userAccount', {
+export const userAccount = pgTable('userAccount', {
     id: serial('id').primaryKey(),
     userId: text('userId').notNull(),
     imageGenerationTokens: integer('imageGenerationTokens').notNull().default(0),
@@ -14,7 +12,7 @@ export const userAccount = imageGenSchema.table('userAccount', {
     }
 });
 
-export const generatedImage = imageGenSchema.table('generatedImage', {
+export const generatedImage = pgTable('generatedImage', {
     id: serial('id').primaryKey(),
     userAccountId: integer('userAccountId').references(() => userAccount.id),
     prompt: text('prompt').notNull(),

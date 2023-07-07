@@ -7,8 +7,8 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "drizzle:generate": "drizzle-kit generate:pg --out drizzle/migrations --schema src/server/db/schema.ts",
-    "drizzle:migrate": "npx dotenv -e .env -- node src/server/db/migration.mjs"
+    "drizzle:generate": "drizzle-kit generate:pg --out drizzle/migrations --schema drizzle/schema.ts",
+    "drizzle:migrate": "npx dotenv -e .env -- node drizzle/migrate.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.363.0",
