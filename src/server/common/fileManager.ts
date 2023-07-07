@@ -5,8 +5,8 @@ import { nanoid } from 'nanoid';
 const s3Client = new S3Client({
     credentials: {
         accessKeyId: env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: env.AWS_SECRET_KEY
-    }
+        secretAccessKey: env.AWS_SECRET_KEY,
+    },
 })
 
 export interface UploadFilesOptions {
@@ -27,24 +27,26 @@ export async function uploadFiles(contentToUpload: Blob[], opts: UploadFilesOpti
 
             const imageId = nanoid();
             const key = `${imageId}.${ext}`;
+            const buffer = new Uint8Array(await blob.arrayBuffer());
 
             const command = new PutObjectCommand({
                 Bucket: env.AWS_BUCKET_NAME,
                 Key: key,
+                ContentType: blob.type,
+                Body: buffer,
                 Metadata: opts.metadata,
-                Body: blob
             });
 
             try {
                 const result: PutObjectCommandOutput = await s3Client.send(command);
                 console.log("File uploaded: ", result);
+                return { key };
             }
             catch (err) {
                 const filename = blob.name ?? "[unnamed]";
-                console.error(`Failed to upload file: ${filename}`, err);
+                console.error(`Failed to upload file with key '${key}': '${filename}'`, err);
+                throw err;
             }
-
-            return { key };
         }
 
         uploadFilePromises.push(uploadFile());
@@ -60,6 +62,7 @@ export async function uploadFiles(contentToUpload: Blob[], opts: UploadFilesOpti
     return urls;
 }
 
+// host:image-gen-generated-images.s3.us-east-1.amazonaws.com
 export function getImageUrl(key: string) {
     return `https://${env.AWS_BUCKET_NAME}.s3.amazonaws.com/${key}`
 }

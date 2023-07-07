@@ -34,6 +34,8 @@ export async function generateImages({ prompt, userId, count }: GenerateImageOpt
         throw new Error("no were returned from OpenAI");
     }
 
+    console.log("generated images: ", imageData.data);
+
     const imagesPromises: Promise<GeneratedImageData>[] = [];
 
     for (const d of imageData.data) {

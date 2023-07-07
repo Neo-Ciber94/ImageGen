@@ -41,16 +41,23 @@ export default function GenerateSearchBar({ onChange }: InputSearchBarProps) {
   const [text, setText] = useAtom(searchBarAtom);
 
   const handleGenerate = async () => {
-    await generateImage.mutateAsync({ prompt: text}, {
-      onError(err) {
-        console.error(err);
-        toast.error(err.message);
-      },
-      async onSuccess(){
-        setText("");
-        await apiContext.images.getAll.invalidate();
-      }
-    })
+    const run = async () => {
+      return await generateImage.mutateAsync({ prompt: text}, {
+        async onSuccess(){
+          setText("");
+          await apiContext.images.getAll.invalidate();
+        }
+      })
+    }
+
+    const t = await toast.promise(run(), {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+      error: err => err?.message ?? "Something went wrong",
+      loading: "Loading...",
+      success: "Image generated"
+    });
+
+    console.log(t);
   };
 
   return (
