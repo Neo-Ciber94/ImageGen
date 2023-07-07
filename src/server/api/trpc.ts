@@ -10,7 +10,6 @@ import { TRPCError, initTRPC } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { prisma } from "~/server/db";
 import { type User, getAuth, clerkClient } from "@clerk/nextjs/server";
 
 /**
@@ -37,7 +36,6 @@ type CreateContextOptions = {
  */
 const createInnerTRPCContext = ({ user }: CreateContextOptions) => {
   return {
-    prisma,
     user
   };
 };
@@ -126,4 +124,7 @@ export const isAuthenticated = middleware(async (opts) => {
  */
 export const publicProcedure = t.procedure;
 
+/**
+ * Protected procedure (require user to be authenticated)
+ */
 export const protectedProcedure = publicProcedure.use(isAuthenticated);
