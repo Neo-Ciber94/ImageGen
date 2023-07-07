@@ -1,6 +1,8 @@
-import { eq } from "drizzle-orm";
+import { type InferModel, eq } from "drizzle-orm";
 import { db } from "./drizzle";
 import { generatedImage, userAccount } from "drizzle/schema";
+
+export type GeneratedImage = InferModel<typeof generatedImage>;
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace UserAccounts {
@@ -9,7 +11,7 @@ export namespace UserAccounts {
             .from(userAccount)
             .where(eq(userAccount.userId, userId));
 
-        if (userAccountResults.length > 1) {
+        if (userAccountResults.length >= 1) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             return userAccountResults[0]!;
         }
@@ -26,5 +28,13 @@ export namespace GeneratedImages {
         const userAccount = await UserAccounts.getOrCreateUserAccount(userId);
         const images = await db.select().from(generatedImage).where(eq(generatedImage.userAccountId, userAccount.id));
         return images;
+    }
+
+    export async function saveGeneratedImages(userId: string, data: Pick<GeneratedImage, 'key' | 'prompt'>[]) {
+        const userAccount = await UserAccounts.getOrCreateUserAccount(userId);
+
+        const input = data.map(x => ({ ...x, userAccountId: userAccount.id }));
+        const result = await db.insert(generatedImage).values(input).returning();
+        return result;
     }
 }

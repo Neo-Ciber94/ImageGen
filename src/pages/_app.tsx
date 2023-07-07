@@ -3,6 +3,7 @@ import { type AppType } from "next/app";
 import { api } from "~/utils/api";
 import Layout from "~/layout/Layout";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "react-hot-toast";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
@@ -10,6 +11,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
       <Layout>
         <Component {...pageProps} />
       </Layout>
+      <Toaster />
     </ClerkProvider>
   );
 };

@@ -19,6 +19,8 @@ export default function HomePage() {
               src="/images/bg_home.png"
               fill
               className="mx-auto object-cover lg:mx-0"
+              placeholder="blur"
+              blurDataURL="LmM3xC$[n|xIOssrogWB}XJ*Sdsq"
             />
           </div>
         </div>

@@ -13,7 +13,7 @@ export interface UploadFilesOptions {
     metadata?: Record<string, string>;
 }
 
-export async function uploadFiles(contentToUpload: Blob[], opts: UploadFilesOptions = {}): Promise<URL[]> {
+export async function uploadFiles(contentToUpload: Blob[], opts: UploadFilesOptions = {}) {
     const uploadFilePromises: Promise<{ key: string }>[] = [];
 
     for (const blob of contentToUpload) {
@@ -52,10 +52,14 @@ export async function uploadFiles(contentToUpload: Blob[], opts: UploadFilesOpti
 
     const result = await Promise.all(uploadFilePromises);
     const urls = result.map(({ key }) => {
-        const url = new URL(`https://${env.AWS_BUCKET_NAME}.s3.amazonaws.com/${key}`)
-        return url;
+        const url = new URL(getImageUrl(key))
+        return { url, key };
     });
 
     console.log(`${urls.length} files uploaded successfully`, urls);
     return urls;
+}
+
+export function getImageUrl(key: string) {
+    return `https://${env.AWS_BUCKET_NAME}.s3.amazonaws.com/${key}`
 }

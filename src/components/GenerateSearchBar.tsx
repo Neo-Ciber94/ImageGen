@@ -1,6 +1,8 @@
 import { BsSearch } from "react-icons/bs";
 import { atom, useAtom } from "jotai";
 import { useCallback } from "react";
+import { api } from "~/utils/api";
+import toast from "react-hot-toast";
 
 const searchBarAtom = atom("");
 
@@ -34,10 +36,21 @@ export interface InputSearchBarProps {
 }
 
 export default function GenerateSearchBar({ onChange }: InputSearchBarProps) {
+  const generateImage = api.images.generateImage.useMutation();
+  const apiContext = api.useContext();
   const [text, setText] = useAtom(searchBarAtom);
 
-  const handleGenerate = () => {
-    setText("");
+  const handleGenerate = async () => {
+    await generateImage.mutateAsync({ prompt: text}, {
+      onError(err) {
+        console.error(err);
+        toast.error(err.message);
+      },
+      async onSuccess(){
+        setText("");
+        await apiContext.images.getAll.invalidate();
+      }
+    })
   };
 
   return (
@@ -60,7 +73,7 @@ export default function GenerateSearchBar({ onChange }: InputSearchBarProps) {
       </div>
       {text.length > 0 && (
         <button
-          onClick={handleGenerate}
+          onClick={() => void handleGenerate()}
           className="px-8 text-gray-500 transition duration-300 hover:bg-black hover:text-white"
         >
           Generate

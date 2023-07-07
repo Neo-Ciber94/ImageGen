@@ -52,7 +52,7 @@ function UserAvatar({ user }: UserAvatarProps) {
   return (
     <div className="overflow-hidden rounded-full shadow">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img alt="User" src={user.imageUrl} width={40} height={40} />
+      <img alt="User" src={user.imageUrl} width={30} height={30} />
     </div>
   );
 }

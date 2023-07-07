@@ -45,7 +45,7 @@ export default function GalleryPage() {
 
         <div className="grid grid-cols-2 gap-2 px-8 pb-2 pt-6 md:gap-6 lg:grid-cols-5">
           {images &&
-            images.map((img, idx) => {
+            images.map((data, idx) => {
               return (
                 <div
                   key={idx}
@@ -53,7 +53,7 @@ export default function GalleryPage() {
                     idx % 6 === 0 ? "col-span-2" : ""
                   }`}
                 >
-                  <GeneratedImage src={img} />
+                  <GeneratedImage src={data.url} />
                 </div>
               );
             })}
