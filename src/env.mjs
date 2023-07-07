@@ -40,7 +40,7 @@ export const env = createEnv({
     MY_AWS_SECRET_KEY: process.env.MY_AWS_SECRET_KEY,
     MY_AWS_BUCKET_NAME: process.env.MY_AWS_BUCKET_NAME,
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBL,
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
