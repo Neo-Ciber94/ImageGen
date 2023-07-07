@@ -4,8 +4,8 @@ import { nanoid } from 'nanoid';
 
 const s3Client = new S3Client({
     credentials: {
-        accessKeyId: env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: env.AWS_SECRET_KEY,
+        accessKeyId: env.MY_AWS_ACCESS_KEY_ID,
+        secretAccessKey: env.MY_AWS_SECRET_KEY,
     },
 })
 
@@ -30,7 +30,7 @@ export async function uploadFiles(contentToUpload: Blob[], opts: UploadFilesOpti
             const buffer = new Uint8Array(await blob.arrayBuffer());
 
             const command = new PutObjectCommand({
-                Bucket: env.AWS_BUCKET_NAME,
+                Bucket: env.MY_AWS_BUCKET_NAME,
                 Key: key,
                 ContentType: blob.type,
                 Body: buffer,
@@ -64,7 +64,7 @@ export async function uploadFiles(contentToUpload: Blob[], opts: UploadFilesOpti
 
 export async function deleteFile(key: string) {
     const command = new DeleteObjectCommand({
-        Bucket: env.AWS_BUCKET_NAME,
+        Bucket: env.MY_AWS_BUCKET_NAME,
         Key: key,
     });
 
@@ -73,5 +73,5 @@ export async function deleteFile(key: string) {
 
 // host:image-gen-generated-images.s3.us-east-1.amazonaws.com
 export function getImageUrl(key: string) {
-    return `https://${env.AWS_BUCKET_NAME}.s3.amazonaws.com/${key}`
+    return `https://${env.MY_AWS_BUCKET_NAME}.s3.amazonaws.com/${key}`
 }
