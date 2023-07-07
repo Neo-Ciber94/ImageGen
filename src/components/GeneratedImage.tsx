@@ -12,10 +12,11 @@ export default function GeneratedImage({ src }: GeneratedImageProps) {
     <>
       <div
         onClick={() => setOpen(true)}
-        className="relative overflow-hidden rounded-lg border border-gray-200/50 shadow-md"
+        className="relative cursor-pointer overflow-hidden rounded-lg border 
+        border-gray-200/50 shadow-md transition-shadow duration-200 hover:shadow-lg"
       >
         <Image
-          className="h-full w-full object-contain"
+          className="h-full w-full object-contain "
           alt={src}
           src={src}
           width={512}
