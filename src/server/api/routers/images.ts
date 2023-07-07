@@ -27,7 +27,7 @@ export const imagesRouter = createTRPCRouter({
       if (!userAccount.isUnlimited && userAccount.imageGenerationTokens <= 0) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: 'User do not have enough tokens to generate images'
+          message: "You don't have enough tokens to generate images"
         })
       }
 
@@ -54,8 +54,8 @@ export const imagesRouter = createTRPCRouter({
       await GeneratedImages.saveGeneratedImages(ctx.user.id, input)
 
       if (!userAccount.isUnlimited) {
-      // Decrement tokens count
-      await UserAccounts.decrementTokenCount(ctx.user.id, IMAGE_COUNT);
+        // Decrement tokens count
+        await UserAccounts.decrementTokenCount(ctx.user.id, IMAGE_COUNT);
       }
 
       return imageResult.map(x => x.url);

@@ -1,34 +1,36 @@
 import Head from "next/head";
-import GenerateSearchBar, {
-  useSetSearchTerm,
-} from "~/components/GenerateSearchBar";
+import GenerateSearchBar from "~/components/GenerateSearchBar";
+import { useSetSearchTerm } from "~/atoms/promptTextAtom";
 import { api } from "~/utils/api";
 import GeneratedImage from "~/components/GeneratedImage";
 import LoadingIndicator from "~/components/LoadingIndicator";
 import { toast } from "react-hot-toast";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
+import { deferred } from "~/utils/promises";
 
 export default function GalleryPage() {
   const apiContext = api.useContext();
   const setRandomSearchTerm = useSetSearchTerm();
   const { data: images, isLoading, error } = api.images.getAll.useQuery();
   const lastElementRef = useRef<HTMLDivElement | null>(null);
-  const deleteImage = api.images.deleteImage.useMutation({
-    async onSuccess() {
-      await apiContext.images.getAll.invalidate();
-    },
-  });
+  const deleteImage = api.images.deleteImage.useMutation();
 
   const handleDelete = async (id: number) => {
+    const toastPromise = deferred<void>();
+    void toast.promise(toastPromise.promise, {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+      error: (err) => err?.message ?? "Something went wrong",
+      success: "Image deleted successfully",
+      loading: "Deleting...",
+    });
+
     try {
-      await toast.promise(deleteImage.mutateAsync({ id }), {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-        error: (err) => err?.message ?? "Something went wrong",
-        loading: "Deleting...",
-        success: "Image deleted successfully",
-      });
+      await deleteImage.mutateAsync({ id });
+      await apiContext.images.getAll.invalidate();
+      toastPromise.resolve();
     } catch (err) {
       console.error(err);
+      toastPromise.reject(err);
     }
   };
 

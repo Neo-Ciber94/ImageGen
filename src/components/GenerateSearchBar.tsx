@@ -1,35 +1,9 @@
 import { BsSearch } from "react-icons/bs";
-import { atom, useAtom } from "jotai";
-import { useCallback } from "react";
+import { useAtom } from "jotai";
 import { api } from "~/utils/api";
 import toast from "react-hot-toast";
-
-const searchBarAtom = atom("");
-
-export function useSetSearchTerm() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, setText] = useAtom(searchBarAtom);
-
-  const setRandomSearchTerm = useCallback(() => {
-    const prompts: string[] = [
-      "A fluffy white cat sitting on a pink pillow",
-      "A serene mountain landscape with a flowing river",
-      "A futuristic cityscape at night with flying cars",
-      "A field of sunflowers under a bright blue sky",
-      "A cozy cabin nestled in a snowy forest",
-      "A vibrant underwater coral reef teeming with marine life",
-      "A majestic castle on top of a hill surrounded by mist",
-      "A bustling street market with colorful stalls",
-      "A magical forest with glowing mushrooms and fairies",
-      "A mouthwatering spread of delicious desserts on a table",
-    ];
-
-    const term = prompts[Math.floor(Math.random() * prompts.length)] as string;
-    setText(term);
-  }, [setText]);
-
-  return setRandomSearchTerm;
-}
+import { deferred } from "~/utils/promises";
+import { promptTextAtom } from "~/atoms/promptTextAtom";
 
 export interface InputSearchBarProps {
   afterGenerate?: () => void;
@@ -40,30 +14,28 @@ export default function GenerateSearchBar({
 }: InputSearchBarProps) {
   const generateImage = api.images.generateImage.useMutation();
   const apiContext = api.useContext();
-  const [text, setText] = useAtom(searchBarAtom);
+  const [text, setText] = useAtom(promptTextAtom);
 
   const handleGenerate = async () => {
-    const run = async () => {
-      return await generateImage.mutateAsync(
-        { prompt: text },
-        {
-          async onSuccess() {
-            setText("");
-            afterGenerate?.();
-            await apiContext.images.getAll.invalidate();
-          },
-        }
-      );
-    };
-
-    const t = await toast.promise(run(), {
+    const toastPromise = deferred<void>();
+    void toast.promise(toastPromise.promise, {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
       error: (err) => err?.message ?? "Something went wrong",
       loading: "Loading...",
       success: "Image generated",
     });
 
-    console.log(t);
+    try {
+      const result = await generateImage.mutateAsync({ prompt: text });
+      setText("");
+      afterGenerate?.();
+      await apiContext.images.getAll.invalidate();
+      toastPromise.resolve();
+      console.log(result);
+    } catch (err) {
+      console.error(err);
+      toastPromise.reject(err);
+    }
   };
 
   return (
