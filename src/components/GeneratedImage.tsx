@@ -1,5 +1,7 @@
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { MdDelete } from "react-icons/md";
 import { type GeneratedImageModel } from "~/server/db/repositories";
 
@@ -34,14 +36,16 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
         </div>
       </div>
 
-      {open && (
-        <FullscreenImage
-          url={img.url}
-          prompt={img.prompt}
-          onDelete={onDelete}
-          onClose={() => setOpen(false)}
-        />
-      )}
+      {open &&
+        createPortal(
+          <FullscreenImage
+            url={img.url}
+            prompt={img.prompt}
+            onDelete={onDelete}
+            onClose={() => setOpen(false)}
+          />,
+          document.body
+        )}
     </>
   );
 }
@@ -59,11 +63,14 @@ function FullscreenImage({
   onClose,
   onDelete,
 }: FullscreenImageProps) {
+  const [isOpen, setIsOpen] = useState(true);
   useEffect(() => {
     document.body.style.overflow = "hidden";
+    document.body.style.marginRight = "16px";
 
     return () => {
       document.body.style.overflow = "auto";
+      document.body.style.marginRight = "0px";
     };
   }, []);
 
@@ -86,44 +93,64 @@ function FullscreenImage({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-30 h-screen w-full bg-black/70 p-5 backdrop-blur-lg lg:p-10"
-      onClick={onClose}
-    >
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          void handleDelete();
-        }}
-        className="absolute right-10 top-10 z-40"
-        title="Delete"
-      >
-        <MdDelete className="cursor-pointer text-3xl text-red-500 transition-colors duration-200 hover:text-red-700" />
-      </button>
+    <AnimatePresence onExitComplete={onClose}>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-30 h-screen w-full bg-black/70 p-5 backdrop-blur-lg lg:p-10"
+          onClick={() => {
+            setIsOpen(false);
+          }}
+        >
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              void handleDelete();
+            }}
+            className="absolute right-10 top-10 z-40"
+            title="Delete"
+          >
+            <MdDelete className="cursor-pointer text-3xl text-red-500 transition-colors duration-200 hover:text-red-700" />
+          </button>
 
-      <div className="relative flex h-full flex-row items-center justify-center">
-        <Image
-          className="h-auto w-full max-w-[512px]"
-          width={0}
-          height={0}
-          sizes="100vw"
-          alt={prompt}
-          src={url}
-          onClick={(e) => e.stopPropagation()}
-        />
-      </div>
+          <AnimatePresence>
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+              transition={{
+                type: "spring",
+                duration: 0.3
+              }}
+              className="relative flex h-full flex-row items-center justify-center"
+            >
+              <Image
+                className="h-auto w-full max-w-[512px]"
+                width={0}
+                height={0}
+                sizes="100vw"
+                alt={prompt}
+                src={url}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </motion.div>
+          </AnimatePresence>
 
-      <p
-        className="lg:max-fit absolute inset-x-0 bottom-6 left-1/2 max-h-8 w-10/12 -translate-x-1/2 
+          <p
+            className="lg:max-fit absolute inset-x-0 bottom-6 left-1/2 max-h-8 w-10/12 -translate-x-1/2 
       rotate-1 cursor-pointer text-ellipsis rounded-xl bg-white p-2 text-center font-mono
        text-sm transition-all duration-200 selection:bg-violet-400
        selection:text-white hover:max-h-[300px] md:w-fit
       "
-        title={prompt}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {prompt.toLowerCase()}
-      </p>
-    </div>
+            title={prompt}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {prompt.toLowerCase()}
+          </p>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

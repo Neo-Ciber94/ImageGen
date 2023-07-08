@@ -8,6 +8,7 @@ import { toast } from "react-hot-toast";
 import { useRef } from "react";
 import { deferred } from "~/utils/promises";
 import { useDebounce } from "~/hooks/useDebounce";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function GalleryPage() {
   const apiContext = api.useContext();
@@ -19,6 +20,12 @@ export default function GalleryPage() {
   const deleteImage = api.images.deleteImage.useMutation();
 
   const handleDelete = async (id: number) => {
+    const shouldDelete = confirm("Do you want to delete this image?");
+
+    if (!shouldDelete) {
+      return;
+    }
+
     const toastPromise = deferred<void>();
     void toast.promise(toastPromise.promise, {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
@@ -72,29 +79,34 @@ export default function GalleryPage() {
             className="mt-20 flex w-full cursor-pointer select-none flex-row justify-center p-4 
           text-2xl text-violet-300 transition duration-200 hover:text-violet-400 md:text-4xl"
           >
-            No Images, Want to generate one?
+            No Images found, generate one?
           </h1>
         )}
 
-        <div className="grid  grid-flow-row-dense grid-cols-2 gap-2 px-8 pb-2 pt-6 md:gap-6 lg:grid-cols-5">
+        <div className="grid grid-flow-row-dense grid-cols-2 gap-2 px-8 pb-2 pt-6 md:gap-6 lg:grid-cols-5">
           {images &&
             images.map((data, idx) => {
               return (
-                <div
-                  key={idx}
-                  className={`slide-grow-animation relative mb-auto scale-[80] opacity-0 ${
-                    idx % 3 === 0 ? "col-span-2 row-span-2" : ""
-                  }`}
-                  style={{
-                    animationDelay: `${idx * 100}ms`,
-                  }}
-                  ref={idx === images.length - 1 ? lastElementRef : undefined}
-                >
-                  <GeneratedImage
-                    img={data}
-                    onDelete={() => handleDelete(data.id)}
-                  />
-                </div>
+                <AnimatePresence key={idx}>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      type: "sprint",
+                      duration: 0.25,
+                      delay: 0.08 * idx,
+                    }}
+                    className={`relative mb-auto ${
+                      idx % 3 === 0 ? "col-span-2 row-span-2" : ""
+                    }`}
+                    ref={idx === images.length - 1 ? lastElementRef : undefined}
+                  >
+                    <GeneratedImage
+                      img={data}
+                      onDelete={() => handleDelete(data.id)}
+                    />
+                  </motion.div>
+                </AnimatePresence>
               );
             })}
         </div>
