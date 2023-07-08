@@ -1,9 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { MdDelete } from "react-icons/md";
 import { type GeneratedImageModel } from "~/server/db/repositories";
+import ImageWithFallback from "./ImageWithFallback";
 
 type GeneratedImageType = Pick<
   GeneratedImageModel,
@@ -27,7 +27,7 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
         border-gray-200/50 shadow-md transition-all duration-200 hover:shadow-lg 
         dark:border-white/10 dark:hover:shadow-violet-400/20"
         >
-          <Image
+          <ImageWithFallback
             className="h-full w-full object-contain"
             alt={img.prompt}
             src={img.url}
@@ -40,7 +40,7 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
       {open &&
         createPortal(
           <FullscreenImage
-            url={img.url}
+            url={img.url + "2"}
             prompt={img.prompt}
             onDelete={onDelete}
             onClose={() => setOpen(false)}
@@ -127,7 +127,7 @@ function FullscreenImage({
               }}
               className="relative flex h-full flex-row items-center justify-center"
             >
-              <Image
+              <ImageWithFallback
                 className="h-auto w-full max-w-[512px]"
                 width={0}
                 height={0}

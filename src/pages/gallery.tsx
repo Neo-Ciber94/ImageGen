@@ -9,7 +9,6 @@ import { api } from "~/utils/api";
 import GeneratedImage from "~/components/GeneratedImage";
 import LoadingIndicator from "~/components/LoadingIndicator";
 import { toast } from "react-hot-toast";
-import { useRef } from "react";
 import { deferred } from "~/utils/promises";
 import { useDebounce } from "~/hooks/useDebounce";
 import { AnimatePresence, motion } from "framer-motion";
@@ -27,7 +26,6 @@ export default function GalleryPage() {
   } = api.images.getAll.useQuery({
     q: q.trim().length === 0 || isGenerateImageLoading ? undefined : q,
   });
-  const lastElementRef = useRef<HTMLDivElement | null>(null);
   const deleteImage = api.images.deleteImage.useMutation();
 
   const handleDelete = async (id: number) => {
@@ -66,13 +64,10 @@ export default function GalleryPage() {
           <GenerateImageSearchBar
             afterGenerate={() => {
               setTimeout(() => {
-                const { current } = lastElementRef;
-                if (current) {
-                  window.scrollTo({
-                    top: document.body.scrollHeight,
-                    behavior: "smooth",
-                  });
-                }
+                window.scrollTo({
+                  top: document.body.scrollHeight,
+                  behavior: "smooth",
+                });
               }, 500);
             }}
           />
@@ -109,7 +104,7 @@ export default function GalleryPage() {
           {images &&
             images.map((data, idx) => {
               return (
-                <AnimatePresence key={idx}>
+                <AnimatePresence key={data.id}>
                   <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -121,7 +116,6 @@ export default function GalleryPage() {
                     className={`relative mb-auto ${
                       idx % 3 === 0 ? "col-span-2 row-span-2" : ""
                     }`}
-                    ref={idx === images.length - 1 ? lastElementRef : undefined}
                   >
                     <GeneratedImage
                       img={data}
