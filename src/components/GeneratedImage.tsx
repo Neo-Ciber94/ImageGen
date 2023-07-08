@@ -139,7 +139,7 @@ function FullscreenImage({
           </AnimatePresence>
 
           <p
-            className="lg:max-fit absolute inset-x-0 bottom-6 left-1/2 max-h-8 w-10/12 -translate-x-1/2 
+            className="lg:max-fit absolute inset-x-0 bottom-6 left-1/2 max-h-10 w-10/12 -translate-x-1/2 
       rotate-1 cursor-pointer text-ellipsis rounded-xl bg-white p-2 text-center font-mono
        text-sm transition-all duration-200 selection:bg-violet-400
        selection:text-white hover:max-h-[300px] md:w-fit

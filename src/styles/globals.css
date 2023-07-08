@@ -1,3 +1,26 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /* width */
+  ::-webkit-scrollbar {
+    @apply w-4 shadow-lg;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 4px rgb(108, 108, 108, 0.5);
+    @apply bg-neutral-100;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    @apply bg-violet-600 shadow-lg;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-violet-700;
+  }
+}
