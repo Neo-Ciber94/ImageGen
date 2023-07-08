@@ -12,7 +12,10 @@ export default {
   stacks(app) {
     app.stack(function Site({ stack }) {
       const site = new NextjsSite(stack, "ImageGenSite", {
-        environment: env
+        environment: {
+          ...env,
+          SERVER_URL: "https://du8ecttu3enax.cloudfront.net"
+        },
       });
 
       stack.addOutputs({

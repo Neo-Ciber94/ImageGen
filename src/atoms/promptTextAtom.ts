@@ -1,13 +1,16 @@
 import { atom, useAtom } from "jotai";
 import { useCallback } from "react";
 
-export const promptTextAtom = atom("");
+export const generateImageSearchBarAtom = atom({
+    text: "",
+    loading: false
+});
 
-export function useSetSearchTerm() {
+export function useSetRandomPrompt() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [_, setText] = useAtom(promptTextAtom);
+    const [_state, setState] = useAtom(generateImageSearchBarAtom);
 
-    const setRandomSearchTerm = useCallback(() => {
+    const setRandomPrompt = useCallback(() => {
         const prompts: string[] = [
             "A fluffy white cat sitting on a pink pillow",
             "A serene mountain landscape with a flowing river",
@@ -21,14 +24,19 @@ export function useSetSearchTerm() {
             "A mouthwatering spread of delicious desserts on a table",
         ];
 
-        const term = prompts[Math.floor(Math.random() * prompts.length)] as string;
-        setText(term);
-    }, [setText]);
+        const text = prompts[Math.floor(Math.random() * prompts.length)] as string;
+        setState(p => ({ ...p, text: text }))
+    }, [setState])
 
-    return setRandomSearchTerm;
+    return setRandomPrompt;
+}
+
+export function useIsGeneratingImage() {
+    const [state] = useAtom(generateImageSearchBarAtom);
+    return state.loading;
 }
 
 export function useSearchText() {
-    const [text] = useAtom(promptTextAtom);
-    return text;
+    const [state] = useAtom(generateImageSearchBarAtom);
+    return state.text;
 }

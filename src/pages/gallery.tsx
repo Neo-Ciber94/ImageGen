@@ -1,6 +1,10 @@
 import Head from "next/head";
-import GenerateSearchBar from "~/components/GenerateSearchBar";
-import { useSearchText, useSetSearchTerm } from "~/atoms/promptTextAtom";
+import GenerateImageSearchBar from "~/components/GenerateImageSearchBar";
+import {
+  useIsGeneratingImage,
+  useSearchText,
+  useSetRandomPrompt,
+} from "~/atoms/promptTextAtom";
 import { api } from "~/utils/api";
 import GeneratedImage from "~/components/GeneratedImage";
 import LoadingIndicator from "~/components/LoadingIndicator";
@@ -12,10 +16,17 @@ import { AnimatePresence, motion } from "framer-motion";
 
 export default function GalleryPage() {
   const apiContext = api.useContext();
-  const setRandomSearchTerm = useSetSearchTerm();
+  const setRandomSearchTerm = useSetRandomPrompt();
+  const isGenerateImageLoading = useIsGeneratingImage();
   const search = useSearchText();
   const q = useDebounce(search, 1000);
-  const { data: images, isLoading, error } = api.images.getAll.useQuery({ q });
+  const {
+    data: images,
+    isLoading,
+    error,
+  } = api.images.getAll.useQuery({
+    q: q.trim().length === 0 || isGenerateImageLoading ? undefined : q,
+  });
   const lastElementRef = useRef<HTMLDivElement | null>(null);
   const deleteImage = api.images.deleteImage.useMutation();
 
@@ -52,11 +63,17 @@ export default function GalleryPage() {
 
       <div className="relative p-4">
         <div className="sticky inset-x-0 top-8 z-10 w-full px-10 py-2">
-          <GenerateSearchBar
+          <GenerateImageSearchBar
             afterGenerate={() => {
-              if (lastElementRef.current) {
-                lastElementRef.current.scrollIntoView({ behavior: "smooth" });
-              }
+              setTimeout(() => {
+                const { current } = lastElementRef;
+                if (current) {
+                  window.scrollTo({
+                    top: document.body.scrollHeight,
+                    behavior: "smooth",
+                  });
+                }
+              }, 500);
             }}
           />
         </div>
@@ -73,15 +90,20 @@ export default function GalleryPage() {
           </p>
         )}
 
-        {images && images.length === 0 && (
-          <h1
-            onClick={() => setRandomSearchTerm()}
-            className="mt-20 flex w-full cursor-pointer select-none flex-row justify-center p-4 
+        {!isGenerateImageLoading &&
+          !isLoading &&
+          images &&
+          images.length === 0 && (
+            <h1
+              onClick={() => {
+                setRandomSearchTerm();
+              }}
+              className="mt-20 flex w-full cursor-pointer select-none flex-row justify-center p-4 
           text-2xl text-violet-300 transition duration-200 hover:text-violet-400 md:text-4xl"
-          >
-            No Images found, generate one?
-          </h1>
-        )}
+            >
+              No Images found, generate one?
+            </h1>
+          )}
 
         <div className="grid grid-flow-row-dense grid-cols-2 gap-2 px-8 pb-2 pt-6 md:gap-6 lg:grid-cols-5">
           {images &&

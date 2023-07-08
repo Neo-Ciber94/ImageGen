@@ -24,7 +24,8 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
         <div
           onClick={() => setOpen(true)}
           className="group relative cursor-pointer overflow-hidden rounded-lg border 
-        border-gray-200/50 shadow-md transition-shadow duration-200 hover:shadow-lg"
+        border-gray-200/50 shadow-md transition-all duration-200 hover:shadow-lg 
+        dark:border-white/10 dark:hover:shadow-violet-400/20"
         >
           <Image
             className="h-full w-full object-contain"
@@ -122,7 +123,7 @@ function FullscreenImage({
               exit={{ scale: 0.8 }}
               transition={{
                 type: "spring",
-                duration: 0.3
+                duration: 0.3,
               }}
               className="relative flex h-full flex-row items-center justify-center"
             >
