@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 
 export function useDarkMode() {
-    const [isDark, setIsDark] = useState(false);
+    const [isDark, setDarkMode] = useState(false);
 
     const setDark = useCallback((dark: boolean) => {
-        setIsDark(dark);
+        setDarkMode(dark);
 
         if (dark) {
             document.body.classList.add("dark");
@@ -21,9 +21,8 @@ export function useDarkMode() {
 
     useEffect(() => {
         const dark = localStorage.getItem("theme") === "dark";
-        setIsDark(dark);
+        setDark(dark);
     }, [setDark])
 
     return { isDark, setDark, toggle }
 }
-

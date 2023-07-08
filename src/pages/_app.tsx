@@ -11,13 +11,6 @@ const MyApp: AppType = ({ Component, pageProps }) => {
     <>
       <Head>
         <title>ImageGen</title>
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `body.dark {
-            background: rgb(2 6 23)
-          }`,
-          }}
-        ></style>
       </Head>
       <ClerkProvider {...pageProps}>
         <Layout>

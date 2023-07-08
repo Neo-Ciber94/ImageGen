@@ -12,5 +12,5 @@ export default function Page() {
     return <Redirect to="/gallery" />;
   }
 
-  return <SignUp />;
+  return <SignUp redirectUrl={window.location.origin} />;
 }

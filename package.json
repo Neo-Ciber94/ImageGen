@@ -11,8 +11,8 @@
     "drizzle:migrate": "npx dotenv -e .env -- node drizzle/migrate.mjs",
     "sst:run": "npx dotenv -e .env -v SKIP_ENV_VALIDATION=true -- sst bind next dev",
     "sst:dev": "npx dotenv -e .env -v SKIP_ENV_VALIDATION=true -- npx sst dev",
-    "sst:deploy": "npx dotenv -e .env.production -v SKIP_ENV_VALIDATION=true -- npx sst deploy --stage prod",
-    "sst:remove": "npx dotenv -e .env.production -v SKIP_ENV_VALIDATION=true -- npx sst remove"
+    "sst:deploy": "npx dotenv -e .env -v SKIP_ENV_VALIDATION=true -- npx sst deploy --stage prod",
+    "sst:remove": "npx dotenv -e .env -v SKIP_ENV_VALIDATION=true -- npx sst remove"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.363.0",
@@ -37,6 +37,7 @@
     "react-dom": "18.2.0",
     "react-hot-toast": "^2.4.1",
     "react-icons": "^4.10.1",
+    "sharp": "^0.32.1",
     "superjson": "1.12.2",
     "zod": "^3.21.4"
   },

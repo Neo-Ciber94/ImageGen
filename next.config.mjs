@@ -6,10 +6,15 @@ import { env } from "./src/env.mjs";
  */
 await import("./src/env.mjs");
 
+if (process.env.NEXT_OUTPUT) {
+  console.log(`Build output: ${process.env.NEXT_OUTPUT}`);
+}
+
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
 
+  output: process.env.NEXT_OUTPUT ? process.env.NEXT_OUTPUT : undefined,
   /**
    * If you have `experimental: { appDir: true }` set, then you must comment the below `i18n` config
    * out.
