@@ -27,7 +27,7 @@ const config = {
         hostname: "placehold.co",
       },
       {
-        hostname: `${env.AWS_BUCKET_NAME}.s3.amazonaws.com`,
+        hostname: `${env.MY_AWS_BUCKET_NAME}.s3.amazonaws.com`,
       },
     ],
   },
