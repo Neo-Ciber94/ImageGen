@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="min-h-[80px] border-t p-2">
+    <footer className="min-h-[80px] border-t p-2 dark:border-t-violet-700">
       <div className="flex h-full flex-row items-center justify-center text-gray-400">
         <span className="text-md">
           ImageGen &copy; {new Date().getFullYear()}

@@ -4,6 +4,7 @@ import { Lato } from "next/font/google";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { BiImage } from "react-icons/bi";
+import DarkModeToggle from "~/components/DarkModeToggle";
 import LoadingIndicator from "~/components/LoadingIndicator";
 
 const font = Lato({
@@ -16,7 +17,10 @@ export default function Header() {
   const { isLoaded, isSignedIn, user } = useUser();
 
   return (
-    <header className="flex flex-row justify-between border-b border-gray-300/50 px-4 py-4 text-purple-600 shadow-md">
+    <header
+      className="flex flex-row justify-between border-b border-gray-300/50 
+    px-4 py-4 text-purple-600 shadow-md dark:border-b-violet-700"
+    >
       <Link href="/" className="flex flex-row items-center">
         <BiImage fontSize={35} className="mr-3" />
         <div
@@ -39,6 +43,7 @@ export default function Header() {
 
         {!isLoaded && <LoadingIndicator />}
         {user && <UserAvatar user={user} />}
+        <DarkModeToggle />
       </div>
     </header>
   );

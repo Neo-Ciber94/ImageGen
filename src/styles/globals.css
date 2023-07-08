@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body.dark {
+  @apply bg-slate-950;
+}
+
 @layer base {
   /* width */
   ::-webkit-scrollbar {
