@@ -1,17 +1,20 @@
 import Head from "next/head";
 import GenerateSearchBar from "~/components/GenerateSearchBar";
-import { useSetSearchTerm } from "~/atoms/promptTextAtom";
+import { useSearchText, useSetSearchTerm } from "~/atoms/promptTextAtom";
 import { api } from "~/utils/api";
 import GeneratedImage from "~/components/GeneratedImage";
 import LoadingIndicator from "~/components/LoadingIndicator";
 import { toast } from "react-hot-toast";
 import { useRef } from "react";
 import { deferred } from "~/utils/promises";
+import { useDebounce } from "~/hooks/useDebounce";
 
 export default function GalleryPage() {
   const apiContext = api.useContext();
   const setRandomSearchTerm = useSetSearchTerm();
-  const { data: images, isLoading, error } = api.images.getAll.useQuery();
+  const search = useSearchText();
+  const q = useDebounce(search, 1000);
+  const { data: images, isLoading, error } = api.images.getAll.useQuery({ q });
   const lastElementRef = useRef<HTMLDivElement | null>(null);
   const deleteImage = api.images.deleteImage.useMutation();
 

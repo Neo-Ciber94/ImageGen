@@ -27,3 +27,8 @@ export function useSetSearchTerm() {
 
     return setRandomSearchTerm;
 }
+
+export function useSearchText() {
+    const [text] = useAtom(promptTextAtom);
+    return text;
+}

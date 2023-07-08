@@ -1,4 +1,4 @@
-import { type InferModel, eq, and } from "drizzle-orm";
+import { type InferModel, eq, and, sql } from "drizzle-orm";
 import { db } from "./drizzle";
 import { generatedImages, userAccounts } from "drizzle/schema";
 import { clerkClient } from "@clerk/nextjs";
@@ -43,9 +43,24 @@ export namespace UserAccounts {
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace GeneratedImages {
-    export async function getAllImages(userId: string) {
+    export async function getAllImages(userId: string, search?: string) {
         const userAccount = await UserAccounts.getOrCreateUserAccount(userId);
-        const images = await db.select().from(generatedImages).where(eq(generatedImages.userAccountId, userAccount.id));
+
+        if (search && search.trim().length > 0) {
+            const query = `%${search.toLowerCase()}%`;
+            const images = await db.select()
+                .from(generatedImages)
+                .where(and(
+                    eq(generatedImages.userAccountId, userAccount.id),
+                    sql`LIKE(LOWER(${generatedImages.prompt}), ${query})`
+                ));
+
+            return images;
+        }
+
+        const images = await db.select()
+            .from(generatedImages)
+            .where(eq(generatedImages.userAccountId, userAccount.id));
         return images;
     }
 

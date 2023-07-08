@@ -1,9 +1,12 @@
+import { useUser } from "@clerk/nextjs";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { BsHeart } from "react-icons/bs";
 
 export default function HomePage() {
+  const { isSignedIn } = useUser();
+
   return (
     <>
       <Head>
@@ -36,14 +39,17 @@ export default function HomePage() {
           </p>
 
           <div className="flex w-full flex-row">
-            <Link href="/sign-up" className="ml-auto">
+            <Link
+              href={isSignedIn ? "/gallery" : "/sign-up"}
+              className="ml-auto"
+            >
               <button
                 className=" flex flex-row items-center justify-between gap-3 rounded-lg bg-gradient-to-tr from-violet-500
             to-violet-700 px-10 py-3 text-center text-white            
            shadow-lg  transition  duration-200 hover:from-violet-700
            hover:to-violet-500 hover:ring-4 hover:ring-purple-300 active:scale-95 active:from-violet-600 active:to-violet-600"
               >
-                <span>Get me started</span>
+                <span>{isSignedIn ? "Go to Gallery" : "Get me started"}</span>
                 <BsHeart className="mt-1 text-lg" />
               </button>
             </Link>

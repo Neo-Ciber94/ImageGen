@@ -11,9 +11,10 @@ const MAX_PROMPT_LENGTH = 400;
 export const imagesRouter = createTRPCRouter({
   // Get all images
   getAll: protectedProcedure
+    .input(z.object({ q: z.string().trim().optional() }))
     .output(z.array(z.object({ id: z.number(), url: z.string(), prompt: z.string(), createdAt: z.date() })))
-    .query(async ({ ctx }) => {
-      const generatedImagesResult = await GeneratedImages.getAllImages(ctx.user.id);
+    .query(async ({ ctx, input: { q } }) => {
+      const generatedImagesResult = await GeneratedImages.getAllImages(ctx.user.id, q);
       return generatedImagesResult.map(x => ({ ...x, url: getImageUrl(x.key) }))
     }),
 
