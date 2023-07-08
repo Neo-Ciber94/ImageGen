@@ -3,6 +3,8 @@ import { db } from "./drizzle";
 import { generatedImages, userAccounts } from "drizzle/schema";
 import { clerkClient } from "@clerk/nextjs";
 
+export const DEFAULT_USER_TOKEN_COUNT = 20;
+
 export type GeneratedImageModel = InferModel<typeof generatedImages>;
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -19,7 +21,9 @@ export namespace UserAccounts {
 
         const user = await clerkClient.users.getUser(userId);
         const userName = user.username || user.emailAddresses[0]?.emailAddress || user.firstName;
-        const result = await db.insert(userAccounts).values({ userId, userName }).returning();
+        const result = await db.insert(userAccounts)
+            .values({ userId, userName, imageGenerationTokens: DEFAULT_USER_TOKEN_COUNT })
+            .returning();
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-non-null-assertion
         return result[0]!;
     }
