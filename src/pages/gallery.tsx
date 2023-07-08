@@ -82,9 +82,12 @@ export default function GalleryPage() {
               return (
                 <div
                   key={idx}
-                  className={`relative mb-auto ${
+                  className={`slide-grow-animation relative mb-auto scale-[80] opacity-0 ${
                     idx % 3 === 0 ? "col-span-2 row-span-2" : ""
                   }`}
+                  style={{
+                    animationDelay: `${idx * 100}ms`,
+                  }}
                   ref={idx === images.length - 1 ? lastElementRef : undefined}
                 >
                   <GeneratedImage
