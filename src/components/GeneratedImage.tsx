@@ -40,7 +40,7 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
       {open &&
         createPortal(
           <FullscreenImage
-            url={img.url + "2"}
+            url={img.url}
             prompt={img.prompt}
             onDelete={onDelete}
             onClose={() => setOpen(false)}
