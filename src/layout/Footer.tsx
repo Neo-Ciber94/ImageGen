@@ -8,7 +8,7 @@ export default function Footer() {
         minHeight: FOOTER_HEIGHT,
       }}
     >
-      <div className="flex h-full flex-row items-center justify-center text-gray-400">
+      <div className="flex h-full flex-row items-center justify-center text-gray-400 dark:text-pink-200">
         <span className="text-md">
           ImageGen &copy; {new Date().getFullYear()}
         </span>

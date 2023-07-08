@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { BiImage } from "react-icons/bi";
 import DarkModeToggle from "~/components/DarkModeToggle";
+import { ForEachCharacter } from "~/components/ForEachCharacter";
 import LoadingIndicator from "~/components/LoadingIndicator";
 
 const font = Lato({
@@ -22,12 +23,15 @@ export default function Header() {
     px-4 py-4 text-purple-600 shadow-md dark:border-b-violet-700"
     >
       <Link href="/" className="flex flex-row items-center">
-        <BiImage fontSize={35} className="mr-3" />
+        <BiImage fontSize={35} className="mr-3 hover:text-violet-400" />
         <div
           className="flex flex-row font-mono text-xl font-bold"
           style={font.style}
         >
-          ImageGen
+          <ForEachCharacter
+            text={"ImageGen"}
+            className={"hover:text-violet-400"}
+          />
         </div>
       </Link>
 

@@ -2,11 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-body.dark {
-  @apply bg-slate-950;
-}
-
 @layer base {
+  body {
+    @apply transition-colors duration-300;
+  }
+
+  body.dark {
+    @apply bg-slate-950;
+  }
+
   /* width */
   ::-webkit-scrollbar {
     @apply w-4 shadow-lg;

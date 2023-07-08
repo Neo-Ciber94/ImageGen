@@ -1,39 +1,30 @@
-import { AnimatePresence, motion } from "framer-motion";
-import { type PropsWithChildren } from "react";
+import { useAnimation, motion } from "framer-motion";
 import { BsFillSunFill, BsFillMoonFill } from "react-icons/bs";
 import { useDarkMode } from "~/hooks/useDarkMode";
+import { useEffect } from "react";
 
 export default function DarkModeToggle() {
   const { isDark, toggle } = useDarkMode();
+  const controls = useAnimation();
+
+  useEffect(() => {
+    void controls.start({ rotate: isDark ? 360 : 0 });
+  }, [isDark, controls]);
 
   return (
     <button className="h-8 w-8" onClick={toggle}>
-      {isDark ? (
-        <RotateOnAppear>
-          <BsFillSunFill className="text-2xl text-white" />
-        </RotateOnAppear>
-      ) : (
-        <RotateOnAppear>
-          <BsFillMoonFill className="text-2xl" />
-        </RotateOnAppear>
-      )}
-    </button>
-  );
-}
-
-function RotateOnAppear({ children }: PropsWithChildren) {
-  return (
-    <AnimatePresence>
       <motion.div
-        initial={{ scale: 0.6 }}
-        animate={{ scale: 1 }}
-        exit={{ scale: 0.6 }}
-        transition={{
-          duration: 0.2,
-        }}
+        initial={{ rotate: 0 }}
+        animate={controls}
+        transition={{ duration: 1 }}
+        className="flex items-center justify-center"
       >
-        {children}
+        {isDark ? (
+          <BsFillSunFill className="text-2xl text-white" />
+        ) : (
+          <BsFillMoonFill className="text-2xl" />
+        )}
       </motion.div>
-    </AnimatePresence>
+    </button>
   );
 }
