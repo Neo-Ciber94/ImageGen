@@ -13,6 +13,7 @@ import { deferred } from "~/utils/promises";
 import { useDebounce } from "~/hooks/useDebounce";
 import { AnimatePresence, motion } from "framer-motion";
 import { AnimatedPage } from "~/components/AnimatedPage";
+import { getTRPCValidationError } from "~/utils/getTRPCValidationError";
 
 export default function GalleryPage() {
   const apiContext = api.useContext();
@@ -50,6 +51,12 @@ export default function GalleryPage() {
       toastPromise.resolve();
     } catch (err) {
       console.error(err);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const trpcError = getTRPCValidationError(err);
+      if (trpcError) {
+        return toastPromise.reject(trpcError);
+      }
+
       toastPromise.reject(err);
     }
   };

@@ -6,6 +6,7 @@ import { deferred } from "~/utils/promises";
 import { generateImageSearchBarAtom } from "~/atoms/promptTextAtom";
 import { useMediaQuery } from "~/hooks/useMediaQuery";
 import { useEffect } from "react";
+import { getTRPCValidationError } from "~/utils/getTRPCValidationError";
 
 export interface InputSearchBarProps {
   afterGenerate?: () => void;
@@ -49,6 +50,12 @@ export default function GenerateImageSearchBar({
       console.log(result);
     } catch (err) {
       console.error(err);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const trpcError = getTRPCValidationError(err);
+      if (trpcError) {
+        return toastPromise.reject(trpcError);
+      }
+
       toastPromise.reject(err);
     } finally {
       setSearchBarState((p) => ({ ...p, loading: false }));
@@ -67,8 +74,8 @@ export default function GenerateImageSearchBar({
         />
         <textarea
           id="generate-search-bar"
-          className="w-full resize-none bg-transparent outline-none
-          placeholder:italic dark:placeholder:text-violet-300"
+          className="w-full resize-none overflow-x-hidden whitespace-normal bg-transparent outline-none placeholder:italic
+          dark:placeholder:text-violet-300 sm:whitespace-nowrap"
           rows={isSmallScreen ? 4 : 1}
           placeholder="Generate or search..."
           value={searchBarState.text}

@@ -6,15 +6,19 @@ import { getImageUrl, uploadFiles } from '~/server/common/fileManager';
 import { GeneratedImages, UserAccounts } from '~/server/db/repositories';
 
 const IMAGE_COUNT = 1;
-const MAX_PROMPT_LENGTH = 400;
+const MAX_PROMPT_LENGTH = 800;
 
 export const imagesRouter = createTRPCRouter({
   // Get all images
   getAll: protectedProcedure
-    .input(z.object({ q: z.string().trim().optional() }))
+    .input(z.object({
+      q: z.string().trim().nullish(),
+      limit: z.number().min(1).max(100).nullish(),
+      page: z.number().nullish()
+    }))
     .output(z.array(z.object({ id: z.number(), url: z.string(), prompt: z.string(), createdAt: z.date() })))
     .query(async ({ ctx, input: { q } }) => {
-      const generatedImagesResult = await GeneratedImages.getAllImages(ctx.user.id, q);
+      const generatedImagesResult = await GeneratedImages.getAllImages(ctx.user.id, { search: q });
       return generatedImagesResult.map(x => ({ ...x, url: getImageUrl(x.key) }))
     }),
 

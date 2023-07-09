@@ -47,8 +47,12 @@ export namespace UserAccounts {
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace GeneratedImages {
-    export async function getAllImages(userId: string, search?: string) {
+    export interface GetAllImagesOptions {
+        search?: string | null | undefined
+    }
+    export async function getAllImages(userId: string, options: GetAllImagesOptions = {}) {
         const userAccount = await UserAccounts.getOrCreateUserAccount(userId);
+        const { search } = options;
 
         if (search && search.trim().length > 0) {
             const query = `%${search.toLowerCase()}%`;
