@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 export function useMediaQuery(query: string) {
-    const [matching, setIsMatching] = useState(() => checkMatchQuery(query));
+    const [matching, setIsMatching] = useState<boolean>(() => checkMatchQuery(query));
 
     useEffect(() => {
         const handleResize = () => {
@@ -15,9 +15,9 @@ export function useMediaQuery(query: string) {
         }
     }, [query])
 
-    return matching.matches;
+    return matching;
 }
 
 function checkMatchQuery(query: string) {
-    return window.matchMedia(query);
+    return typeof window !== 'undefined' && window.matchMedia(query).matches;
 }
