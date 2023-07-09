@@ -7,14 +7,27 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
+    // Database
     DATABASE_URL: z.string().url(),
+
+    // Node
     NODE_ENV: z.enum(["development", "test", "production"]),
+
+    // OpenAI
+    OPEN_API_KEY: z.string(),
+
+    // Upstash
     UPSTASH_REDIS_REST_URL: z.string(),
     UPSTASH_REDIS_REST_TOKEN: z.string(),
-    OPEN_API_KEY: z.string(),
+    QSTASH_URL: z.string(),
+    QSTASH_TOKEN: z.string(),
+
+    // AWS Keys
     MY_AWS_ACCESS_KEY_ID: z.string(),
     MY_AWS_SECRET_KEY: z.string(),
     MY_AWS_BUCKET_NAME: z.string(),
+
+    // Clerk
     CLERK_SECRET_KEY: z.string(),
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string(),
   },
@@ -42,8 +55,9 @@ export const env = createEnv({
     MY_AWS_SECRET_KEY: process.env.MY_AWS_SECRET_KEY,
     MY_AWS_BUCKET_NAME: process.env.MY_AWS_BUCKET_NAME,
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
-      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+    QSTASH_URL: process.env.QSTASH_URL,
+    QSTASH_TOKEN: process.env.QSTASH_TOKEN,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
