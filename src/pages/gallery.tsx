@@ -12,6 +12,7 @@ import { toast } from "react-hot-toast";
 import { deferred } from "~/utils/promises";
 import { useDebounce } from "~/hooks/useDebounce";
 import { AnimatePresence, motion } from "framer-motion";
+import { AnimatedPage } from "~/components/AnimatedPage";
 
 export default function GalleryPage() {
   const apiContext = api.useContext();
@@ -59,74 +60,76 @@ export default function GalleryPage() {
         <title>ImageGen | Gallery</title>
       </Head>
 
-      <div className="relative p-4">
-        <div className="sticky inset-x-0 top-8 z-10 w-full px-10 py-2">
-          <GenerateImageSearchBar
-            afterGenerate={() => {
-              setTimeout(() => {
-                window.scrollTo({
-                  top: document.body.scrollHeight,
-                  behavior: "smooth",
-                });
-              }, 500);
-            }}
-          />
-        </div>
-
-        {isLoading && (
-          <div className="w-full p-4 text-center">
-            <LoadingIndicator size={25} />
-          </div>
-        )}
-
-        {error && (
-          <p className="text-md mx-auto mt-10 flex w-5/6 flex-row justify-center rounded-md bg-red-300/50 p-4 font-bold text-red-600">
-            {error?.message || "Something went wrong"}
-          </p>
-        )}
-
-        {!isGenerateImageLoading &&
-          !isLoading &&
-          images &&
-          images.length === 0 && (
-            <h1
-              onClick={() => {
-                setRandomSearchTerm();
+      <AnimatedPage>
+        <div className="relative p-4">
+          <div className="sticky inset-x-0 top-8 z-10 w-full px-2 py-2 md:px-10">
+            <GenerateImageSearchBar
+              afterGenerate={() => {
+                setTimeout(() => {
+                  window.scrollTo({
+                    top: document.body.scrollHeight,
+                    behavior: "smooth",
+                  });
+                }, 500);
               }}
-              className="mt-20 flex w-full cursor-pointer select-none flex-row justify-center p-4 
-          text-2xl text-violet-300 transition duration-200 hover:text-violet-400 md:text-4xl"
-            >
-              No Images found, generate one?
-            </h1>
+            />
+          </div>
+
+          {isLoading && (
+            <div className="w-full p-4 text-center">
+              <LoadingIndicator size={25} />
+            </div>
           )}
 
-        <div className="grid grid-flow-row-dense grid-cols-2 gap-2 px-8 pb-2 pt-6 md:gap-6 lg:grid-cols-5">
-          {images &&
-            images.map((data, idx) => {
-              return (
-                <AnimatePresence key={data.id}>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{
-                      type: "sprint",
-                      duration: 0.25,
-                      delay: 0.08 * idx,
-                    }}
-                    className={`relative mb-auto ${
-                      idx % 3 === 0 ? "col-span-2 row-span-2" : ""
-                    }`}
-                  >
-                    <GeneratedImage
-                      img={data}
-                      onDelete={() => handleDelete(data.id)}
-                    />
-                  </motion.div>
-                </AnimatePresence>
-              );
-            })}
+          {error && (
+            <p className="text-md mx-auto mt-10 flex w-5/6 flex-row justify-center rounded-md bg-red-300/50 p-4 font-bold text-red-600">
+              {error?.message || "Something went wrong"}
+            </p>
+          )}
+
+          {!isGenerateImageLoading &&
+            !isLoading &&
+            images &&
+            images.length === 0 && (
+              <h1
+                onClick={() => {
+                  setRandomSearchTerm();
+                }}
+                className="mt-20 flex w-full cursor-pointer select-none flex-row justify-center p-4 
+          text-2xl text-violet-300 transition duration-200 hover:text-violet-400 md:text-4xl"
+              >
+                No Images found, generate one?
+              </h1>
+            )}
+
+          <div className="grid grid-flow-row-dense grid-cols-2 gap-2 px-2 pb-2 pt-6 md:gap-6 md:px-8 lg:grid-cols-5">
+            {images &&
+              images.map((data, idx) => {
+                return (
+                  <AnimatePresence key={data.id}>
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{
+                        type: "sprint",
+                        duration: 0.25,
+                        delay: 0.08 * idx,
+                      }}
+                      className={`relative mb-auto ${
+                        idx % 3 === 0 ? "col-span-2 row-span-2" : ""
+                      }`}
+                    >
+                      <GeneratedImage
+                        img={data}
+                        onDelete={() => handleDelete(data.id)}
+                      />
+                    </motion.div>
+                  </AnimatePresence>
+                );
+              })}
+          </div>
         </div>
-      </div>
+      </AnimatedPage>
     </>
   );
 }

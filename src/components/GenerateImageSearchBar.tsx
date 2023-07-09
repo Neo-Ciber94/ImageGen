@@ -58,7 +58,8 @@ export default function GenerateImageSearchBar({
         />
         <input
           id="generate-search-bar"
-          className="w-full bg-transparent outline-none placeholder:italic dark:placeholder:text-violet-300"
+          className="w-full bg-transparent text-xs outline-none placeholder:italic dark:placeholder:text-violet-300
+          sm:text-base"
           placeholder="Generate or search..."
           value={searchBarState.text}
           disabled={generateImage.isLoading}
@@ -77,7 +78,7 @@ export default function GenerateImageSearchBar({
         <button
           onClick={() => void handleGenerate()}
           disabled={generateImage.isLoading}
-          className={`bg-black px-8 text-gray-500 transition duration-300 hover:bg-black hover:text-white disabled:bg-black`}
+          className={`bg-black px-8 text-xs text-gray-500 transition duration-300 hover:bg-black hover:text-white disabled:bg-black sm:text-base`}
         >
           Generate
         </button>
