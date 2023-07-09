@@ -69,15 +69,13 @@ export default function GalleryPage() {
 
       <AnimatedPage>
         <div className="relative p-4">
-          <div className="sticky inset-x-0 top-8 z-10 w-full px-2 py-2 md:px-10">
+          <div className={`fixed inset-x-0 z-10 w-full px-2 py-2 md:px-10`}>
             <GenerateImageSearchBar
               afterGenerate={() => {
-                setTimeout(() => {
-                  window.scrollTo({
-                    top: document.body.scrollHeight,
-                    behavior: "smooth",
-                  });
-                }, 500);
+                window.scrollTo({
+                  top: 0,
+                  behavior: "smooth",
+                });
               }}
             />
           </div>
@@ -109,7 +107,7 @@ export default function GalleryPage() {
               </h1>
             )}
 
-          <div className="grid grid-flow-row-dense grid-cols-2 gap-2 px-2 pb-2 pt-6 md:gap-6 md:px-8 lg:grid-cols-5">
+          <div className="grid grid-flow-row-dense grid-cols-2 gap-2 px-2 pb-2 pt-20 md:gap-6 md:px-8 lg:grid-cols-5">
             {images &&
               images.map((data, idx) => {
                 return (

@@ -7,6 +7,7 @@ import { GeneratedImages, UserAccounts } from '~/server/db/repositories';
 
 const IMAGE_COUNT = 1;
 const MAX_PROMPT_LENGTH = 800;
+const DEFAULT_LIMIT = 100;
 
 export const imagesRouter = createTRPCRouter({
   // Get all images
@@ -14,11 +15,11 @@ export const imagesRouter = createTRPCRouter({
     .input(z.object({
       q: z.string().trim().nullish(),
       limit: z.number().min(1).max(100).nullish(),
-      page: z.number().nullish()
+      cursor: z.number().nullish()
     }))
     .output(z.array(z.object({ id: z.number(), url: z.string(), prompt: z.string(), createdAt: z.date() })))
-    .query(async ({ ctx, input: { q } }) => {
-      const generatedImagesResult = await GeneratedImages.getAllImages(ctx.user.id, { search: q });
+    .query(async ({ ctx, input: { q, limit = DEFAULT_LIMIT, cursor } }) => {
+      const generatedImagesResult = await GeneratedImages.getAllImages(ctx.user.id, { search: q, limit, cursor });
       return generatedImagesResult.map(x => ({ ...x, url: getImageUrl(x.key) }))
     }),
 

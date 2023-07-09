@@ -64,7 +64,8 @@ export default function GenerateImageSearchBar({
 
   return (
     <div
-      className="flex w-full flex-col gap-3 overflow-hidden rounded-2xl border-2 border-gray-200 bg-white shadow-md dark:border-violet-800/20 
+      className="flex w-full flex-col gap-3 overflow-hidden rounded-2xl border-2 border-gray-200 bg-white 
+      shadow-lg dark:border-violet-800/20 dark:shadow-black/30 shadow-black/10
     dark:bg-slate-900 dark:text-white sm:flex-row"
     >
       <div className="flex w-full flex-row gap-3 px-6 py-3 ">

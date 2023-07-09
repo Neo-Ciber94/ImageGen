@@ -1,4 +1,4 @@
-import { type InferModel, eq, and, sql } from "drizzle-orm";
+import { type InferModel, eq, and, sql, gte, desc } from "drizzle-orm";
 import { db } from "./drizzle";
 import { generatedImages, userAccounts } from "drizzle/schema";
 import { clerkClient } from "@clerk/nextjs";
@@ -48,27 +48,37 @@ export namespace UserAccounts {
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace GeneratedImages {
     export interface GetAllImagesOptions {
-        search?: string | null | undefined
+        search?: string | null,
+        limit: number | null,
+        cursor?: number | null,
     }
-    export async function getAllImages(userId: string, options: GetAllImagesOptions = {}) {
+
+    export async function getAllImages(userId: string, options?: GetAllImagesOptions) {
         const userAccount = await UserAccounts.getOrCreateUserAccount(userId);
-        const { search } = options;
+        if (options) {
+            const { search, limit, cursor } = options;
 
-        if (search && search.trim().length > 0) {
-            const query = `%${search.toLowerCase()}%`;
-            const images = await db.select()
-                .from(generatedImages)
-                .where(and(
-                    eq(generatedImages.userAccountId, userAccount.id),
-                    sql`LIKE(LOWER(${generatedImages.prompt}), ${query})`
-                ));
+            if (search && search.trim().length > 0) {
+                const query = `%${search.toLowerCase()}%`;
+                const images = await db.select()
+                    .from(generatedImages)
+                    .limit(limit ?? 100)
+                    .where(and(
+                        gte(generatedImages.id, cursor ?? 0),
+                        eq(generatedImages.userAccountId, userAccount.id),
+                        sql`LIKE(LOWER(${generatedImages.prompt}), ${query})`
+                    ))
+                    .orderBy(desc(generatedImages.createdAt));
 
-            return images;
+                return images;
+            }
         }
 
         const images = await db.select()
             .from(generatedImages)
-            .where(eq(generatedImages.userAccountId, userAccount.id));
+            .where(eq(generatedImages.userAccountId, userAccount.id))
+            .orderBy(desc(generatedImages.createdAt))
+
         return images;
     }
 

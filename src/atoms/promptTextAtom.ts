@@ -8,9 +8,14 @@ export const generateImageSearchBarAtom = atom({
 
 export function useSetRandomPrompt() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [_state, setState] = useAtom(generateImageSearchBarAtom);
+    const [state, setState] = useAtom(generateImageSearchBarAtom);
 
     const setRandomPrompt = useCallback(() => {
+        // We don't set a random prompt if there is already one
+        if (state.text.trim().length > 0) {
+            return;
+        }
+
         const prompts: string[] = [
             "A fluffy white cat sitting on a pink pillow",
             "A serene mountain landscape with a flowing river",
@@ -26,7 +31,7 @@ export function useSetRandomPrompt() {
 
         const text = prompts[Math.floor(Math.random() * prompts.length)] as string;
         setState(p => ({ ...p, text: text }))
-    }, [setState])
+    }, [setState, state.text])
 
     return setRandomPrompt;
 }
