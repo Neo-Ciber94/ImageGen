@@ -96,7 +96,7 @@ export default function GalleryPage() {
                   setRandomSearchTerm();
                 }}
                 className="mt-20 flex w-full cursor-pointer select-none flex-row justify-center p-4 
-          text-2xl text-violet-300 transition duration-200 hover:text-violet-400 md:text-4xl"
+                text-xl text-violet-300 transition duration-200 hover:text-violet-400 sm:text-2xl md:text-4xl"
               >
                 No Images found, generate one?
               </h1>

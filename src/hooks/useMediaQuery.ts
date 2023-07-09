@@ -1,23 +1,22 @@
 import { useEffect, useState } from "react";
 
 export function useMediaQuery(query: string) {
-    const [matching, setIsMatching] = useState<boolean>(() => checkMatchQuery(query));
+    const [matching, setIsMatching] = useState<boolean>(false);
 
     useEffect(() => {
-        const handleResize = () => {
-            setIsMatching(checkMatchQuery(query));
+        const handleResize = (e: MediaQueryListEvent) => {
+            const isMatching = e.matches;
+            setIsMatching(isMatching);
         }
 
-        handleResize();
-        window.addEventListener("resize", handleResize);
+        const match = window.matchMedia(query);
+        handleResize(new MediaQueryListEvent("change", { matches: match.matches }));
+        match.addEventListener('change', handleResize);
+
         return () => {
-            window.removeEventListener("resize", handleResize);
+            match.removeEventListener("change", handleResize);
         }
     }, [query])
 
     return matching;
-}
-
-function checkMatchQuery(query: string) {
-    return typeof window !== 'undefined' && window.matchMedia(query).matches;
 }

@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { deferred } from "~/utils/promises";
 import { generateImageSearchBarAtom } from "~/atoms/promptTextAtom";
 import { useMediaQuery } from "~/hooks/useMediaQuery";
+import { useEffect } from "react";
 
 export interface InputSearchBarProps {
   afterGenerate?: () => void;
@@ -13,12 +14,18 @@ export interface InputSearchBarProps {
 export default function GenerateImageSearchBar({
   afterGenerate,
 }: InputSearchBarProps) {
-  const isSmallScreen = useMediaQuery("(min-width: 640px)");
+  const isSmallScreen = useMediaQuery("(max-width: 640px)");
   const generateImage = api.images.generateImage.useMutation();
   const apiContext = api.useContext();
   const [searchBarState, setSearchBarState] = useAtom(
     generateImageSearchBarAtom
   );
+
+  useEffect(() => {
+    if (!isSmallScreen) {
+      setSearchBarState((x) => ({ ...x, text: x.text.replace(/\n/g, " ") }));
+    }
+  }, [isSmallScreen, setSearchBarState]);
 
   const handleGenerate = async () => {
     const toastPromise = deferred<void>();
@@ -62,7 +69,7 @@ export default function GenerateImageSearchBar({
           id="generate-search-bar"
           className="w-full resize-none bg-transparent outline-none
           placeholder:italic dark:placeholder:text-violet-300"
-          rows={isSmallScreen ? 1 : 4}
+          rows={isSmallScreen ? 4 : 1}
           placeholder="Generate or search..."
           value={searchBarState.text}
           disabled={generateImage.isLoading}

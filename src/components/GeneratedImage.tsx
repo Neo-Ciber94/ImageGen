@@ -4,6 +4,10 @@ import { createPortal } from "react-dom";
 import { MdDelete } from "react-icons/md";
 import { type GeneratedImageModel } from "~/server/db/repositories";
 import ImageWithFallback from "./ImageWithFallback";
+import {
+  type ImageDisplayColor,
+  getImageDisplayColors,
+} from "~/utils/getImageDisplayColors";
 
 type GeneratedImageType = Pick<
   GeneratedImageModel,
@@ -17,6 +21,7 @@ export interface GeneratedImageProps {
 
 export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
   const [open, setOpen] = useState(false);
+  const [displayColors, setDisplayColors] = useState<ImageDisplayColor>();
 
   return (
     <>
@@ -33,6 +38,10 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
             src={img.url}
             width={512}
             height={512}
+            onLoad={(e) => {
+              const img = e.currentTarget;
+              setDisplayColors(getImageDisplayColors(img));
+            }}
           />
         </div>
       </div>
@@ -44,6 +53,9 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
             prompt={img.prompt}
             onDelete={onDelete}
             onClose={() => setOpen(false)}
+            displayColors={
+              displayColors ?? { bgColor: "black", fgColor: "white" }
+            }
           />,
           document.body
         )}
@@ -54,6 +66,7 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
 interface FullscreenImageProps {
   url: string;
   prompt: string;
+  displayColors: ImageDisplayColor;
   onClose: () => void;
   onDelete: () => Promise<void>;
 }
@@ -63,8 +76,10 @@ function FullscreenImage({
   prompt,
   onClose,
   onDelete,
+  displayColors,
 }: FullscreenImageProps) {
   const [isOpen, setIsOpen] = useState(true);
+
   useEffect(() => {
     document.body.style.overflow = "hidden";
     document.body.style.marginRight = "16px";
@@ -78,7 +93,7 @@ function FullscreenImage({
   useEffect(() => {
     const handleKeyEvent = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onClose();
+        setIsOpen(false);
       }
     };
 
@@ -86,7 +101,7 @@ function FullscreenImage({
     return () => {
       window.removeEventListener("keydown", handleKeyEvent);
     };
-  }, [onClose]);
+  }, []);
 
   const handleDelete = async () => {
     await Promise.resolve(onDelete());
@@ -140,13 +155,19 @@ function FullscreenImage({
           </AnimatePresence>
 
           <p
-            className="lg:max-fit absolute inset-x-0 bottom-6 left-1/2 max-h-10 w-10/12 -translate-x-1/2 
-      rotate-1 cursor-pointer text-ellipsis rounded-xl bg-white p-2 text-center font-mono
-       text-sm transition-all duration-200 selection:bg-violet-400
-       selection:text-white hover:max-h-[300px] md:w-fit
-      "
+            className={`lg:max-fit absolute inset-x-0 bottom-6 left-1/2 max-h-10 w-10/12 -translate-x-1/2 
+              rotate-1 cursor-pointer overflow-hidden text-ellipsis rounded-xl p-2 text-center font-mono
+              text-sm leading-7 transition-all duration-200 ${
+                prompt.length > 40 ? "hover:max-h-[300px]" : ""
+              }
+            selection:bg-violet-400  selection:text-white md:w-fit
+            `}
             title={prompt}
             onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: displayColors.bgColor,
+              color: displayColors.fgColor,
+            }}
           >
             {prompt.toLowerCase()}
           </p>

@@ -27,7 +27,10 @@
     "@trpc/react-query": "^10.26.0",
     "@trpc/server": "^10.26.0",
     "@upstash/redis": "^1.22.0",
+    "color": "^4.2.3",
+    "contrast-color": "^1.0.1",
     "drizzle-orm": "^0.27.0",
+    "fast-average-color": "^9.3.0",
     "framer-motion": "^10.12.18",
     "jotai": "^2.2.2",
     "nanoid": "^4.0.2",
@@ -44,6 +47,8 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@types/color": "^3.0.3",
+    "@types/contrast-color": "^1.0.0",
     "@types/eslint": "^8.37.0",
     "@types/node": "^18.16.0",
     "@types/pg": "^8.10.2",

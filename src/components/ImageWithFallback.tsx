@@ -1,6 +1,6 @@
 import { type ImageProps } from "next/dist/shared/lib/get-img-props";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { forwardRef, useMemo, useState } from "react";
 import { useDarkMode } from "~/hooks/useDarkMode";
 
 const LIGHT_FALLBACK_IMG =
@@ -13,32 +13,32 @@ export type FallbackImageProps = Omit<ImageProps, "onError"> & {
   fallbackSrc?: string;
 };
 
-export default function ImageWithFallback({
-  src,
-  alt,
-  fallbackSrc,
-  ...rest
-}: FallbackImageProps) {
-  const { isDark } = useDarkMode();
-  const fallback = useMemo(() => {
-    if (fallbackSrc) {
-      return fallbackSrc;
-    }
+const ImageWithFallback = forwardRef<HTMLImageElement, FallbackImageProps>(
+  function Inner({ src, alt, fallbackSrc, ...rest }, ref) {
+    const { isDark } = useDarkMode();
+    const fallback = useMemo(() => {
+      if (fallbackSrc) {
+        return fallbackSrc;
+      }
 
-    return isDark ? DARK_FALLBACK_IMG : LIGHT_FALLBACK_IMG;
-  }, [fallbackSrc, isDark]);
-  const [imgSrc, setImgSrc] = useState(src);
+      return isDark ? DARK_FALLBACK_IMG : LIGHT_FALLBACK_IMG;
+    }, [fallbackSrc, isDark]);
+    const [imgSrc, setImgSrc] = useState(src);
 
-  return (
-    <Image
-      {...rest}
-      alt={alt}
-      src={imgSrc}
-      onError={() => {
-        if (imgSrc != fallbackSrc) {
-          setImgSrc(fallback);
-        }
-      }}
-    />
-  );
-}
+    return (
+      <Image
+        {...rest}
+        ref={ref}
+        alt={alt}
+        src={imgSrc}
+        onError={() => {
+          if (imgSrc != fallbackSrc) {
+            setImgSrc(fallback);
+          }
+        }}
+      />
+    );
+  }
+);
+
+export default ImageWithFallback;
