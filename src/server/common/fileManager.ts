@@ -71,7 +71,6 @@ export async function deleteFile(key: string) {
     await s3Client.send(command);
 }
 
-// host:image-gen-generated-images.s3.us-east-1.amazonaws.com
 export function getImageUrl(key: string) {
-    return `https://${env.MY_AWS_BUCKET_NAME}.s3.amazonaws.com/${key}`
+    return `https://dba8sid543nft.cloudfront.net/${key}`
 }

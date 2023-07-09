@@ -157,9 +157,9 @@ function FullscreenImage({
           <p
             className={`lg:max-fit absolute inset-x-0 bottom-6 left-1/2 max-h-12 w-11/12 
               max-w-[600px] -translate-x-1/2 rotate-1 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap 
-              rounded-xl p-2 text-center font-mono text-sm leading-7 shadow-lg
+              rounded-xl p-0 sm:p-2 text-center font-mono leading-7 shadow-lg
               transition-all duration-200 selection:bg-violet-400 selection:text-white 
-              hover:max-h-[400px] hover:whitespace-normal md:w-5/12
+              hover:max-h-[400px] hover:whitespace-normal md:w-5/12 sm:text-sm text-xs
             `}
             onClick={(e) => e.stopPropagation()}
             style={{

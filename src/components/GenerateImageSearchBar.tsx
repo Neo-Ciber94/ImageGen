@@ -15,7 +15,7 @@ export interface InputSearchBarProps {
 export default function GenerateImageSearchBar({
   afterGenerate,
 }: InputSearchBarProps) {
-  const isSmallScreen = useMediaQuery("(max-width: 640px)");
+  const isBigScreen = useMediaQuery("(min-width: 640px)");
   const generateImage = api.images.generateImage.useMutation();
   const apiContext = api.useContext();
   const [searchBarState, setSearchBarState] = useAtom(
@@ -23,10 +23,11 @@ export default function GenerateImageSearchBar({
   );
 
   useEffect(() => {
-    if (!isSmallScreen) {
+    if (isBigScreen) {
+      // When the screen is small we remove all the newline in the current prompt to make it fit in one-line
       setSearchBarState((x) => ({ ...x, text: x.text.replace(/\n/g, " ") }));
     }
-  }, [isSmallScreen, setSearchBarState]);
+  }, [isBigScreen, setSearchBarState]);
 
   const handleGenerate = async () => {
     const toastPromise = deferred<void>();
@@ -65,8 +66,8 @@ export default function GenerateImageSearchBar({
   return (
     <div
       className="flex w-full flex-col gap-3 overflow-hidden rounded-2xl border-2 border-gray-200 bg-white 
-      shadow-lg dark:border-violet-800/20 dark:shadow-black/30 shadow-black/10
-    dark:bg-slate-900 dark:text-white sm:flex-row"
+      shadow-lg shadow-black/10 dark:border-violet-800/20 dark:bg-slate-900
+    dark:text-white dark:shadow-black/30 sm:flex-row"
     >
       <div className="flex w-full flex-row gap-3 px-6 py-3 ">
         <BsSearch
@@ -75,14 +76,17 @@ export default function GenerateImageSearchBar({
         />
         <textarea
           id="generate-search-bar"
-          className="w-full resize-none overflow-x-hidden whitespace-normal bg-transparent outline-none placeholder:italic
-          dark:placeholder:text-violet-300 sm:whitespace-nowrap"
-          rows={isSmallScreen ? 4 : 1}
+          className="w-full resize-none overflow-auto overflow-x-hidden whitespace-normal bg-transparent outline-none
+          placeholder:italic dark:placeholder:text-violet-300 sm:overflow-hidden sm:whitespace-nowrap"
+          rows={isBigScreen ? 1 : 4}
           placeholder="Generate or search..."
           value={searchBarState.text}
           disabled={generateImage.isLoading}
           onInput={(e) => {
-            const newText = e.currentTarget.value;
+            let newText = e.currentTarget.value;
+            if (isBigScreen) {
+              newText = newText.replace(/\n/g, " ");
+            }
             setSearchBarState((p) => ({ ...p, text: newText }));
           }}
         ></textarea>

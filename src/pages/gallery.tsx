@@ -107,7 +107,7 @@ export default function GalleryPage() {
               </h1>
             )}
 
-          <div className="grid grid-flow-row-dense grid-cols-2 gap-2 px-2 pb-2 pt-20 md:gap-6 md:px-8 lg:grid-cols-5">
+          <div className="grid grid-flow-row-dense grid-cols-2 gap-2 px-2 pb-2 pt-52 sm:pt-20 md:gap-6 md:px-8 lg:grid-cols-5">
             {images &&
               images.map((data, idx) => {
                 return (
