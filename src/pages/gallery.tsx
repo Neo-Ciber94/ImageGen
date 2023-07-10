@@ -156,7 +156,6 @@ export default function GalleryPage() {
         <InView
           as="div"
           onChange={(inView) => {
-            console.log({ inView, hasNextPage });
             if (inView && hasNextPage) {
               void fetchNextPage();
             }
