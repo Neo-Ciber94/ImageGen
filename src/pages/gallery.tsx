@@ -41,7 +41,7 @@ export default function GalleryPage() {
         search.trim().length === 0 || isGenerateImageLoading
           ? undefined
           : search,
-      limit: 3,
+      limit: 10,
     },
     {
       getNextPageParam(lastPage) {

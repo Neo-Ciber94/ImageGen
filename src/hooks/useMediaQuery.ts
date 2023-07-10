@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 
-export function useMediaQuery(query: string) {
-    const [matching, setIsMatching] = useState<boolean>(false);
+export interface UseMediaQueryOptions {
+    initialMatching: boolean
+}
+
+export function useMediaQuery(query: string, options: UseMediaQueryOptions = { initialMatching: false }) {
+    const [matching, setIsMatching] = useState<boolean>(options.initialMatching);
 
     useEffect(() => {
         const handleResize = (e: MediaQueryListEvent) => {

@@ -8,6 +8,7 @@ import {
   type ImageDisplayColor,
   getImageDisplayColors,
 } from "~/utils/getImageDisplayColors";
+import { useMediaQuery } from "~/hooks/useMediaQuery";
 
 type GeneratedImageType = Pick<
   GeneratedImageModel,
@@ -78,17 +79,13 @@ function FullscreenImage({
   onDelete,
   displayColors,
 }: FullscreenImageProps) {
+  const isMdBreakpoint = useMediaQuery("(min-width: 640px)", {
+    initialMatching:
+      typeof window === "undefined"
+        ? true
+        : window.matchMedia("(min-width: 640px)").matches,
+  });
   const [isOpen, setIsOpen] = useState(true);
-
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    document.body.style.marginRight = "16px";
-
-    return () => {
-      document.body.style.overflow = "auto";
-      document.body.style.marginRight = "0px";
-    };
-  }, []);
 
   useEffect(() => {
     const handleKeyEvent = (event: KeyboardEvent) => {
@@ -103,13 +100,27 @@ function FullscreenImage({
     };
   }, []);
 
-  const handleDelete = async () => {
-    await Promise.resolve(onDelete());
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    console.log({ isMdBreakpoint });
+
+    document.body.style.marginRight = getBodyScrollbarWidth();
+  }, [isMdBreakpoint]);
+
+  const handleClose = () => {
+    document.body.style.overflow = "auto";
+    document.body.style.marginRight = "0px";
+
     onClose();
   };
 
+  const handleDelete = async () => {
+    await Promise.resolve(onDelete());
+    handleClose();
+  };
+
   return (
-    <AnimatePresence onExitComplete={onClose}>
+    <AnimatePresence onExitComplete={handleClose}>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -157,9 +168,9 @@ function FullscreenImage({
           <p
             className={`lg:max-fit absolute inset-x-0 bottom-6 left-1/2 max-h-12 w-11/12 
               max-w-[600px] -translate-x-1/2 rotate-1 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap 
-              rounded-xl p-0 sm:p-2 text-center font-mono leading-7 shadow-lg
+              rounded-xl p-0 text-center font-mono text-xs leading-7 shadow-lg
               transition-all duration-200 selection:bg-violet-400 selection:text-white 
-              hover:max-h-[400px] hover:whitespace-normal md:w-5/12 sm:text-sm text-xs
+              hover:max-h-[400px] hover:whitespace-normal sm:p-2 sm:text-sm md:w-5/12
             `}
             onClick={(e) => e.stopPropagation()}
             style={{
@@ -173,4 +184,13 @@ function FullscreenImage({
       )}
     </AnimatePresence>
   );
+}
+
+function getBodyScrollbarWidth() {
+  const el = document.createElement("div");
+  el.style.cssText = "overflow:scroll; visibility:hidden; position:absolute;";
+  document.body.appendChild(el);
+  const scrollbarWidth = el.offsetWidth - el.clientWidth;
+  el.remove();
+  return `${scrollbarWidth}px`;
 }
