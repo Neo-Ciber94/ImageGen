@@ -18,6 +18,7 @@ import { Fragment, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { MdOutlineHideImage } from "react-icons/md";
 import { FallingLines } from "react-loader-spinner";
+import ScrollToTop from "~/components/ScrollToTop";
 
 export default function GalleryPage() {
   const apiContext = api.useContext();
@@ -174,6 +175,10 @@ export default function GalleryPage() {
               <FallingLines width="50" color=" rgb(139 92 246)" />
             </div>
           )}
+        </div>
+
+        <div className="fixed bottom-5 right-5 z-10">
+          <ScrollToTop />
         </div>
 
         <div ref={inViewRef}></div>
