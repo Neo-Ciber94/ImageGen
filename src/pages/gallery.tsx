@@ -14,8 +14,10 @@ import { useDebounce } from "~/hooks/useDebounce";
 import { AnimatePresence, motion } from "framer-motion";
 import { AnimatedPage } from "~/components/AnimatedPage";
 import { getTRPCValidationError } from "~/utils/getTRPCValidationError";
-import { Fragment } from "react";
-import { InView } from "react-intersection-observer";
+import { Fragment, useEffect } from "react";
+import { useInView } from "react-intersection-observer";
+import { MdOutlineHideImage } from "react-icons/md";
+import { FallingLines } from "react-loader-spinner";
 
 export default function GalleryPage() {
   const apiContext = api.useContext();
@@ -23,22 +25,35 @@ export default function GalleryPage() {
   const isGenerateImageLoading = useIsGeneratingImage();
   const promptText = usePromptText();
   const search = useDebounce(promptText, 1000);
+  const { ref: inViewRef, inView } = useInView();
 
-  const { data, isLoading, error, hasNextPage, fetchNextPage } =
-    api.images.getAll.useInfiniteQuery(
-      {
-        search:
-          search.trim().length === 0 || isGenerateImageLoading
-            ? undefined
-            : search,
-        limit: 3,
+  const {
+    data,
+    isLoading,
+    error,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = api.images.getAll.useInfiniteQuery(
+    {
+      search:
+        search.trim().length === 0 || isGenerateImageLoading
+          ? undefined
+          : search,
+      limit: 3,
+    },
+    {
+      getNextPageParam(lastPage) {
+        return lastPage.nextCursor;
       },
-      {
-        getNextPageParam(lastPage) {
-          return lastPage.nextCursor;
-        },
-      }
-    );
+    }
+  );
+
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      void fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, inView]);
 
   const deleteImage = api.images.deleteImage.useMutation();
 
@@ -81,7 +96,7 @@ export default function GalleryPage() {
 
       <AnimatedPage>
         <div className="relative p-4">
-          <div className={`fixed inset-x-0 z-10 w-full px-2 py-2 md:px-10`}>
+          <div className={`z-10 w-full px-2 py-2 md:px-10`}>
             <GenerateImageSearchBar
               afterGenerate={() => {
                 window.scrollTo({
@@ -119,7 +134,7 @@ export default function GalleryPage() {
               </h1>
             )}
 
-          <div className="grid grid-flow-row-dense grid-cols-2 gap-2 px-2 pb-2 pt-52 sm:pt-20 md:gap-6 md:px-8 lg:grid-cols-5">
+          <div className="grid grid-flow-row-dense grid-cols-2 gap-2 px-2 pb-2 pt-6 md:gap-6 md:px-8 lg:grid-cols-5">
             {data &&
               data.pages.map((page, pageIdx) => {
                 return (
@@ -153,15 +168,29 @@ export default function GalleryPage() {
           </div>
         </div>
 
-        <InView
-          as="div"
-          onChange={(inView) => {
-            if (inView && hasNextPage) {
-              void fetchNextPage();
-            }
-          }}
-        ></InView>
+        <div className="h-20 w-full p-4 text-center">
+          {isFetchingNextPage && !isLoading && (
+            <div className="flex flex-row items-center justify-center">
+              <FallingLines width="50" color=" rgb(139 92 246)" />
+            </div>
+          )}
+        </div>
+
+        <div ref={inViewRef}></div>
       </AnimatedPage>
+
+      {!hasNextPage &&
+        search.trim().length === 0 &&
+        data &&
+        data.pages.length > 2 && (
+          <div
+            className="flex w-full scale-100 cursor-pointer select-none flex-row items-center justify-center
+              gap-4 px-4 pb-8 pt-2 text-xl text-violet-500 opacity-30 transition-all duration-300 active:scale-90 sm:text-3xl"
+          >
+            <MdOutlineHideImage className="text-5xl" />
+            <span>No more images here</span>
+          </div>
+        )}
     </>
   );
 }

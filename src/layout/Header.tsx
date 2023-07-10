@@ -45,7 +45,7 @@ export default function Header() {
           </SignOutButton>
         )}
 
-        {!isLoaded && <LoadingIndicator />}
+        {!isLoaded && <LoadingIndicator size={25} />}
         {user && <UserAvatar user={user} />}
         <DarkModeToggle />
       </div>
