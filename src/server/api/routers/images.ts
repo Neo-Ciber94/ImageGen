@@ -9,18 +9,27 @@ const IMAGE_COUNT = 1;
 const MAX_PROMPT_LENGTH = 800;
 const DEFAULT_LIMIT = 100;
 
+const getImagesResultScheme = z.object({
+  images: z.array(z.object({ id: z.number(), url: z.string(), prompt: z.string(), createdAt: z.date() })),
+  nextCursor: z.number().nullish()
+})
+
 export const imagesRouter = createTRPCRouter({
   // Get all images
   getAll: protectedProcedure
     .input(z.object({
-      q: z.string().trim().nullish(),
+      search: z.string().trim().nullish(),
       limit: z.number().min(1).max(100).nullish(),
       cursor: z.number().nullish()
     }))
-    .output(z.array(z.object({ id: z.number(), url: z.string(), prompt: z.string(), createdAt: z.date() })))
-    .query(async ({ ctx, input: { q, limit = DEFAULT_LIMIT, cursor } }) => {
-      const generatedImagesResult = await GeneratedImages.getAllImages(ctx.user.id, { search: q, limit, cursor });
-      return generatedImagesResult.map(x => ({ ...x, url: getImageUrl(x.key) }))
+    .output(getImagesResultScheme)
+    .query(async ({ ctx, input }) => {
+      const { search, cursor } = input;
+      const limit = input.limit ?? DEFAULT_LIMIT;
+      
+      const result = await GeneratedImages.getAllImages(ctx.user.id, { search, limit, page: cursor });
+      const images = result.images.map(x => ({ ...x, url: getImageUrl(x.key) }));
+      return { images, nextCursor: result.nextPage }
     }),
 
   // Generate a new image

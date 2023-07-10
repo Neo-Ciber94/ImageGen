@@ -1,4 +1,4 @@
-import { type InferModel, eq, and, sql, gte, desc } from "drizzle-orm";
+import { type InferModel, eq, and, sql, desc } from "drizzle-orm";
 import { db } from "./drizzle";
 import { generatedImages, userAccounts } from "drizzle/schema";
 import { clerkClient } from "@clerk/nextjs";
@@ -49,29 +49,35 @@ export namespace UserAccounts {
 export namespace GeneratedImages {
     export interface GetAllImagesOptions {
         search?: string | null,
-        limit: number | null,
-        cursor?: number | null,
+        limit: number,
+        page?: number | null,
     }
 
     export async function getAllImages(userId: string, options?: GetAllImagesOptions) {
         const userAccount = await UserAccounts.getOrCreateUserAccount(userId);
         if (options) {
-            const { search, limit, cursor } = options;
+            const { search, limit, page } = options;
+            const pageIndex = Math.max(page ?? 1, 1)
 
-            if (search && search.trim().length > 0) {
-                const query = `%${search.toLowerCase()}%`;
-                const images = await db.select()
-                    .from(generatedImages)
-                    .limit(limit ?? 100)
-                    .where(and(
-                        gte(generatedImages.id, cursor ?? 0),
-                        eq(generatedImages.userAccountId, userAccount.id),
-                        sql`LIKE(LOWER(${generatedImages.prompt}), ${query})`
-                    ))
-                    .orderBy(desc(generatedImages.createdAt));
+            const query = search == null ? '%' : `%${search.toLowerCase()}%`;
+            const offset = (pageIndex - 1) * limit;
+            const images = await db.select()
+                .from(generatedImages)
+                .offset(offset)
+                .limit(limit + 1) // we take 1 more to check if there is a next page
+                .where(and(
+                    eq(generatedImages.userAccountId, userAccount.id),
+                    sql`LIKE(LOWER(${generatedImages.prompt}), ${query})`
+                ))
+                .orderBy(desc(generatedImages.createdAt));
 
-                return images;
+            let nextPage: number | undefined = undefined;
+            if (images.length > limit) {
+                images.pop(); // remove last
+                nextPage = pageIndex + 1;
             }
+
+            return { images, nextPage };
         }
 
         const images = await db.select()
@@ -79,7 +85,7 @@ export namespace GeneratedImages {
             .where(eq(generatedImages.userAccountId, userAccount.id))
             .orderBy(desc(generatedImages.createdAt))
 
-        return images;
+        return { images };
     }
 
     export async function saveGeneratedImages(userId: string, data: Pick<GeneratedImageModel, 'key' | 'prompt'>[]) {

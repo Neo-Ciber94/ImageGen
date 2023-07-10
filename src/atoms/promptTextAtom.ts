@@ -41,7 +41,7 @@ export function useIsGeneratingImage() {
     return state.loading;
 }
 
-export function useSearchText() {
+export function usePromptText() {
     const [state] = useAtom(generateImageSearchBarAtom);
     return state.text;
 }

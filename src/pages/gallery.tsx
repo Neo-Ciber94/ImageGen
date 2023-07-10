@@ -2,7 +2,7 @@ import Head from "next/head";
 import GenerateImageSearchBar from "~/components/GenerateImageSearchBar";
 import {
   useIsGeneratingImage,
-  useSearchText,
+  usePromptText,
   useSetRandomPrompt,
 } from "~/atoms/promptTextAtom";
 import { api } from "~/utils/api";
@@ -14,20 +14,32 @@ import { useDebounce } from "~/hooks/useDebounce";
 import { AnimatePresence, motion } from "framer-motion";
 import { AnimatedPage } from "~/components/AnimatedPage";
 import { getTRPCValidationError } from "~/utils/getTRPCValidationError";
+import { Fragment } from "react";
+import { InView } from "react-intersection-observer";
 
 export default function GalleryPage() {
   const apiContext = api.useContext();
   const setRandomSearchTerm = useSetRandomPrompt();
   const isGenerateImageLoading = useIsGeneratingImage();
-  const search = useSearchText();
-  const q = useDebounce(search, 1000);
-  const {
-    data: images,
-    isLoading,
-    error,
-  } = api.images.getAll.useQuery({
-    q: q.trim().length === 0 || isGenerateImageLoading ? undefined : q,
-  });
+  const promptText = usePromptText();
+  const search = useDebounce(promptText, 1000);
+
+  const { data, isLoading, error, hasNextPage, fetchNextPage } =
+    api.images.getAll.useInfiniteQuery(
+      {
+        search:
+          search.trim().length === 0 || isGenerateImageLoading
+            ? undefined
+            : search,
+        limit: 3,
+      },
+      {
+        getNextPageParam(lastPage) {
+          return lastPage.nextCursor;
+        },
+      }
+    );
+
   const deleteImage = api.images.deleteImage.useMutation();
 
   const handleDelete = async (id: number) => {
@@ -94,8 +106,8 @@ export default function GalleryPage() {
 
           {!isGenerateImageLoading &&
             !isLoading &&
-            images &&
-            images.length === 0 && (
+            data &&
+            data.pages.length === 0 && (
               <h1
                 onClick={() => {
                   setRandomSearchTerm();
@@ -108,32 +120,48 @@ export default function GalleryPage() {
             )}
 
           <div className="grid grid-flow-row-dense grid-cols-2 gap-2 px-2 pb-2 pt-52 sm:pt-20 md:gap-6 md:px-8 lg:grid-cols-5">
-            {images &&
-              images.map((data, idx) => {
+            {data &&
+              data.pages.map((page, pageIdx) => {
                 return (
-                  <AnimatePresence key={data.id}>
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{
-                        type: "sprint",
-                        duration: 0.25,
-                        delay: 0.08 * idx,
-                      }}
-                      className={`relative mb-auto ${
-                        idx % 3 === 0 ? "col-span-2 row-span-2" : ""
-                      }`}
-                    >
-                      <GeneratedImage
-                        img={data}
-                        onDelete={() => handleDelete(data.id)}
-                      />
-                    </motion.div>
-                  </AnimatePresence>
+                  <Fragment key={pageIdx}>
+                    {page.images.map((data, idx) => {
+                      return (
+                        <AnimatePresence key={data.id}>
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{
+                              type: "sprint",
+                              duration: 0.25,
+                              delay: 0.08 * idx,
+                            }}
+                            className={`relative mb-auto ${
+                              idx % 3 === 0 ? "col-span-2 row-span-2" : ""
+                            }`}
+                          >
+                            <GeneratedImage
+                              img={data}
+                              onDelete={() => handleDelete(data.id)}
+                            />
+                          </motion.div>
+                        </AnimatePresence>
+                      );
+                    })}
+                  </Fragment>
                 );
               })}
           </div>
         </div>
+
+        <InView
+          as="div"
+          onChange={(inView) => {
+            console.log({ inView, hasNextPage });
+            if (inView && hasNextPage) {
+              void fetchNextPage();
+            }
+          }}
+        ></InView>
       </AnimatedPage>
     </>
   );
