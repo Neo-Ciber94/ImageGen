@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import { MdDelete } from "react-icons/md";
 import { type GeneratedImageModel } from "~/server/db/repositories";
 import ImageWithFallback from "./ImageWithFallback";
@@ -8,7 +7,7 @@ import {
   type ImageDisplayColor,
   getImageDisplayColors,
 } from "~/utils/getImageDisplayColors";
-import { useMediaQuery } from "~/hooks/useMediaQuery";
+import { Dialog } from "@headlessui/react";
 
 type GeneratedImageType = Pick<
   GeneratedImageModel,
@@ -47,24 +46,22 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
         </div>
       </div>
 
-      {open &&
-        createPortal(
-          <FullscreenImage
-            url={img.url}
-            prompt={img.prompt}
-            onDelete={onDelete}
-            onClose={() => setOpen(false)}
-            displayColors={
-              displayColors ?? { bgColor: "black", fgColor: "white" }
-            }
-          />,
-          document.body
-        )}
+      {open && (
+        <PreviewImage
+          url={img.url}
+          prompt={img.prompt}
+          onDelete={onDelete}
+          onClose={() => setOpen(false)}
+          displayColors={
+            displayColors ?? { bgColor: "black", fgColor: "white" }
+          }
+        />
+      )}
     </>
   );
 }
 
-interface FullscreenImageProps {
+interface PreviewImageProps {
   url: string;
   prompt: string;
   displayColors: ImageDisplayColor;
@@ -72,45 +69,16 @@ interface FullscreenImageProps {
   onDelete: () => Promise<void>;
 }
 
-function FullscreenImage({
+function PreviewImage({
   url,
   prompt,
   onClose,
   onDelete,
   displayColors,
-}: FullscreenImageProps) {
-  const isMdBreakpoint = useMediaQuery("(min-width: 640px)", {
-    initialMatching:
-      typeof window === "undefined"
-        ? true
-        : window.matchMedia("(min-width: 640px)").matches,
-  });
+}: PreviewImageProps) {
   const [isOpen, setIsOpen] = useState(true);
 
-  useEffect(() => {
-    const handleKeyEvent = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyEvent);
-    return () => {
-      window.removeEventListener("keydown", handleKeyEvent);
-    };
-  }, []);
-
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    console.log({ isMdBreakpoint });
-
-    document.body.style.marginRight = getBodyScrollbarWidth();
-  }, [isMdBreakpoint]);
-
   const handleClose = () => {
-    document.body.style.overflow = "auto";
-    document.body.style.marginRight = "0px";
-
     onClose();
   };
 
@@ -122,12 +90,15 @@ function FullscreenImage({
   return (
     <AnimatePresence onExitComplete={handleClose}>
       {isOpen && (
-        <motion.div
+        <Dialog
+          static
+          open={isOpen}
+          as={motion.div}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-30 h-screen w-full bg-black/70 p-5 backdrop-blur-lg lg:p-10"
-          onClick={() => {
+          onClose={() => {
             setIsOpen(false);
           }}
         >
@@ -136,14 +107,16 @@ function FullscreenImage({
               e.stopPropagation();
               void handleDelete();
             }}
-            className="absolute right-10 top-10 z-40"
+            className="absolute right-10 top-10 z-40 outline-none"
             title="Delete"
           >
             <MdDelete className="cursor-pointer text-3xl text-red-500 transition-colors duration-200 hover:text-red-700" />
           </button>
 
           <AnimatePresence>
-            <motion.div
+            <Dialog.Panel
+              className="relative flex h-full flex-row items-center justify-center"
+              as={motion.div}
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.8 }}
@@ -151,7 +124,10 @@ function FullscreenImage({
                 type: "spring",
                 duration: 0.3,
               }}
-              className="relative flex h-full flex-row items-center justify-center"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+              }}
             >
               <ImageWithFallback
                 className="h-auto w-full max-w-[512px]"
@@ -162,35 +138,28 @@ function FullscreenImage({
                 src={url}
                 onClick={(e) => e.stopPropagation()}
               />
-            </motion.div>
-          </AnimatePresence>
 
-          <p
-            className={`lg:max-fit absolute inset-x-0 bottom-6 left-1/2 max-h-12 w-11/12 
-              max-w-[600px] -translate-x-1/2 rotate-1 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap 
-              rounded-xl p-0 text-center font-mono text-xs leading-7 shadow-lg
-              transition-all duration-200 selection:bg-violet-400 selection:text-white 
-              hover:max-h-[400px] hover:whitespace-normal sm:p-2 sm:text-sm md:w-5/12
+              <p
+                className={`lg:max-fit absolute inset-x-0 -bottom-2 left-1/2 z-50 max-h-12 
+              w-11/12 max-w-[600px] -translate-x-1/2 rotate-1 cursor-pointer overflow-hidden text-ellipsis 
+              whitespace-nowrap rounded-xl p-0 text-center font-mono text-xs leading-7
+              shadow-lg transition-all duration-200 selection:bg-violet-400 
+              selection:text-white hover:max-h-[400px] hover:whitespace-normal sm:p-2 sm:text-sm md:w-5/12
             `}
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              backgroundColor: displayColors.bgColor,
-              color: displayColors.fgColor,
-            }}
-          >
-            {prompt.toLowerCase()}
-          </p>
-        </motion.div>
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                style={{
+                  backgroundColor: displayColors.bgColor,
+                  color: displayColors.fgColor,
+                }}
+              >
+                {prompt.toLowerCase()}
+              </p>
+            </Dialog.Panel>
+          </AnimatePresence>
+        </Dialog>
       )}
     </AnimatePresence>
   );
-}
-
-function getBodyScrollbarWidth() {
-  const el = document.createElement("div");
-  el.style.cssText = "overflow:scroll; visibility:hidden; position:absolute;";
-  document.body.appendChild(el);
-  const scrollbarWidth = el.offsetWidth - el.clientWidth;
-  el.remove();
-  return `${scrollbarWidth}px`;
 }
