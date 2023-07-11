@@ -13,64 +13,68 @@ export interface UploadFilesOptions {
     metadata?: Record<string, string>;
 }
 
-export async function uploadFiles(contentToUpload: Blob[], opts: UploadFilesOptions = {}) {
-    const uploadFilePromises: Promise<{ key: string }>[] = [];
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace FileHandler {
+    export async function uploadFiles(contentToUpload: Blob[], opts: UploadFilesOptions = {}) {
+        const uploadFilePromises: Promise<{ key: string }>[] = [];
 
-    for (const blob of contentToUpload) {
-        const uploadFile = async () => {
-            // we take the last part of the mime type: image/jpg
-            const ext = blob.type.split('/')[1];
+        for (const blob of contentToUpload) {
+            const uploadFile = async () => {
+                // we take the last part of the mime type: image/jpg
+                const ext = blob.type.split('/')[1];
 
-            if (ext == null) {
-                throw new Error("File extension cannot be found");
+                if (ext == null) {
+                    throw new Error("File extension cannot be found");
+                }
+
+                const imageId = nanoid();
+                const key = `${imageId}.${ext}`;
+                const buffer = new Uint8Array(await blob.arrayBuffer());
+
+                const command = new PutObjectCommand({
+                    Bucket: env.MY_AWS_BUCKET_NAME,
+                    Key: key,
+                    ContentType: blob.type,
+                    Body: buffer,
+                    Metadata: opts.metadata,
+                });
+
+                try {
+                    const result: PutObjectCommandOutput = await s3Client.send(command);
+                    console.log("File uploaded: ", result);
+                    return { key };
+                }
+                catch (err) {
+                    const filename = blob.name ?? "[unnamed]";
+                    console.error(`Failed to upload file with key '${key}': '${filename}'`, err);
+                    throw err;
+                }
             }
 
-            const imageId = nanoid();
-            const key = `${imageId}.${ext}`;
-            const buffer = new Uint8Array(await blob.arrayBuffer());
-
-            const command = new PutObjectCommand({
-                Bucket: env.MY_AWS_BUCKET_NAME,
-                Key: key,
-                ContentType: blob.type,
-                Body: buffer,
-                Metadata: opts.metadata,
-            });
-
-            try {
-                const result: PutObjectCommandOutput = await s3Client.send(command);
-                console.log("File uploaded: ", result);
-                return { key };
-            }
-            catch (err) {
-                const filename = blob.name ?? "[unnamed]";
-                console.error(`Failed to upload file with key '${key}': '${filename}'`, err);
-                throw err;
-            }
+            uploadFilePromises.push(uploadFile());
         }
 
-        uploadFilePromises.push(uploadFile());
+        const result = await Promise.all(uploadFilePromises);
+        const urls = result.map(({ key }) => {
+            const url = new URL(getImageUrl(key))
+            return { url, key };
+        });
+
+        console.log(`${urls.length} files uploaded successfully`, urls);
+        return urls;
     }
 
-    const result = await Promise.all(uploadFilePromises);
-    const urls = result.map(({ key }) => {
-        const url = new URL(getImageUrl(key))
-        return { url, key };
-    });
+    export async function deleteFile(key: string) {
+        const command = new DeleteObjectCommand({
+            Bucket: env.MY_AWS_BUCKET_NAME,
+            Key: key,
+        });
 
-    console.log(`${urls.length} files uploaded successfully`, urls);
-    return urls;
+        await s3Client.send(command);
+    }
+
+    export function getImageUrl(key: string) {
+        return `https://dba8sid543nft.cloudfront.net/${key}`
+    }
 }
 
-export async function deleteFile(key: string) {
-    const command = new DeleteObjectCommand({
-        Bucket: env.MY_AWS_BUCKET_NAME,
-        Key: key,
-    });
-
-    await s3Client.send(command);
-}
-
-export function getImageUrl(key: string) {
-    return `https://dba8sid543nft.cloudfront.net/${key}`
-}

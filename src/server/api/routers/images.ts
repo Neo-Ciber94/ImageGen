@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { TRPCError } from '@trpc/server';
-import { generateImages, moderateContent } from '~/server/services/ai';
-import { deleteFile, getImageUrl, uploadFiles } from '~/server/services/fileHandler';
+import { AI } from '~/server/services/ai';
+import { FileHandler } from '~/server/services/fileHandler';
 import { GeneratedImages, UserAccounts } from '~/server/db/repositories';
 import { MAX_IMAGE_COUNT, MAX_PROMPT_LENGTH } from '~/common/constants';
 
@@ -25,7 +25,7 @@ export const imagesRouter = createTRPCRouter({
       const limit = input.limit ?? 100;
 
       const result = await GeneratedImages.getAllImages(ctx.user.id, { search, limit, page: cursor });
-      const images = result.images.map(x => ({ ...x, url: getImageUrl(x.key) }));
+      const images = result.images.map(x => ({ ...x, url: FileHandler.getImageUrl(x.key) }));
       return { images, nextCursor: result.nextPage }
     }),
 
@@ -44,7 +44,7 @@ export const imagesRouter = createTRPCRouter({
         })
       }
 
-      const moderation = await moderateContent(prompt);
+      const moderation = await AI.moderateContent(prompt);
 
       if (moderation.isFlagged) {
         throw new TRPCError({
@@ -53,9 +53,9 @@ export const imagesRouter = createTRPCRouter({
         });
       }
 
-      const images = await generateImages({ prompt, count: MAX_IMAGE_COUNT, userId: ctx.user.id });
+      const images = await AI.generateImages({ prompt, count: MAX_IMAGE_COUNT, userId: ctx.user.id });
       const blobs = images.map(img => img.blob);
-      const imageResult = await uploadFiles(blobs, {
+      const imageResult = await FileHandler.uploadFiles(blobs, {
         metadata: {
           userId: ctx.user.id,
           prompt
@@ -95,8 +95,7 @@ export const imagesRouter = createTRPCRouter({
       }
 
       try {
-
-        await deleteFile(result.key);
+        await FileHandler.deleteFile(result.key);
       } catch (err) {
         console.error(err);
         throw new TRPCError({

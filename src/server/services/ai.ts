@@ -19,68 +19,72 @@ export interface GeneratedImageData {
     prompt: string;
 }
 
-export async function generateImages({ prompt, userId, count }: GenerateImageOptions) {
-    const imageResponse = await openAi.createImage({
-        prompt,
-        response_format: 'url',
-        n: count,
-        size: '512x512',
-        user: userId
-    });
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace AI {
+    export async function generateImages({ prompt, userId, count }: GenerateImageOptions) {
+        const imageResponse = await openAi.createImage({
+            prompt,
+            response_format: 'url',
+            n: count,
+            size: '512x512',
+            user: userId
+        });
 
-    const imageData = imageResponse.data;
+        const imageData = imageResponse.data;
 
-    if (imageData.data.length === 0) {
-        throw new Error("no were returned from OpenAI");
-    }
-
-    console.log("generated images: ", imageData.data);
-
-    const imagesPromises: Promise<GeneratedImageData>[] = [];
-
-    for (const d of imageData.data) {
-        const imageUrl = d.url;
-
-        if (imageUrl == null) {
-            throw new Error("Image url was null");
+        if (imageData.data.length === 0) {
+            throw new Error("no were returned from OpenAI");
         }
 
-        const fetchImage = async () => {
-            const res = await fetch(imageUrl);
+        console.log("generated images: ", imageData.data);
 
-            if (!res.ok) {
-                const error = await res.text();
-                throw new Error(`Failed to fetch image (${res.statusText}) ${imageUrl}: ${error}`);
+        const imagesPromises: Promise<GeneratedImageData>[] = [];
+
+        for (const d of imageData.data) {
+            const imageUrl = d.url;
+
+            if (imageUrl == null) {
+                throw new Error("Image url was null");
             }
 
-            const imageBlob = await res.blob();
+            const fetchImage = async () => {
+                const res = await fetch(imageUrl);
 
-            return {
-                blob: imageBlob,
-                url: imageUrl,
-                prompt
+                if (!res.ok) {
+                    const error = await res.text();
+                    throw new Error(`Failed to fetch image (${res.statusText}) ${imageUrl}: ${error}`);
+                }
+
+                const imageBlob = await res.blob();
+
+                return {
+                    blob: imageBlob,
+                    url: imageUrl,
+                    prompt
+                }
             }
+
+            imagesPromises.push(fetchImage());
         }
 
-        imagesPromises.push(fetchImage());
+        const result = await Promise.all(imagesPromises);
+        console.log(`${result.length} images were generated for prompt: ${prompt}`);
+        return result;
     }
 
-    const result = await Promise.all(imagesPromises);
-    console.log(`${result.length} images were generated for prompt: ${prompt}`);
-    return result;
-}
+    export async function moderateContent(input: string) {
+        const moderationResponse = await openAi.createModeration({
+            input
+        });
 
-export async function moderateContent(input: string) {
-    const moderationResponse = await openAi.createModeration({
-        input
-    });
+        const data = moderationResponse.data;
+        const isFlagged = data.results.some(x => x.flagged === true);
 
-    const data = moderationResponse.data;
-    const isFlagged = data.results.some(x => x.flagged === true);
-
-    return {
-        results: data.results,
-        isFlagged
+        return {
+            results: data.results,
+            isFlagged
+        }
     }
 }
+
 
