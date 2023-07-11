@@ -94,7 +94,16 @@ export const imagesRouter = createTRPCRouter({
         throw new TRPCError({ code: 'NOT_FOUND' });
       }
 
-      await deleteFile(result.key);
+      try {
+
+        await deleteFile(result.key);
+      } catch (err) {
+        console.error(err);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: "Failed to delete s3 image"
+        });
+      }
 
       return result;
     })

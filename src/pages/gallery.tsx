@@ -19,10 +19,12 @@ import { useInView } from "react-intersection-observer";
 import { MdOutlineHideImage } from "react-icons/md";
 import { FallingLines } from "react-loader-spinner";
 import ScrollToTop from "~/components/ScrollToTop";
+import { useGeneratingImagesCount } from "~/atoms/generatingImageAtom";
 
 export default function GalleryPage() {
   const apiContext = api.useContext();
   const setRandomSearchTerm = useSetRandomPrompt();
+  const generatingImageCount = useGeneratingImagesCount();
   const isGenerateImageLoading = useIsGeneratingImage();
   const promptText = usePromptText();
   const search = useDebounce(promptText, 1000);
@@ -140,6 +142,24 @@ export default function GalleryPage() {
               data.pages.map((page, pageIdx) => {
                 return (
                   <Fragment key={pageIdx}>
+                    {emptyArray(generatingImageCount).map((idx) => (
+                      <AnimatePresence key={`${idx}-placeholder`}>
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{
+                            type: "sprint",
+                            duration: 0.25,
+                            delay: 0.08 * idx,
+                          }}
+                          className={`relative mb-auto h-full
+                        w-full animate-pulse rounded-lg bg-violet-500/30  ${
+                          idx % 3 === 0 ? "col-span-2 row-span-2" : ""
+                        }`}
+                        ></motion.div>
+                      </AnimatePresence>
+                    ))}
+
                     {page.images.map((data, idx) => {
                       return (
                         <AnimatePresence key={data.id}>
@@ -152,7 +172,9 @@ export default function GalleryPage() {
                               delay: 0.08 * idx,
                             }}
                             className={`relative mb-auto ${
-                              idx % 3 === 0 ? "col-span-2 row-span-2" : ""
+                              (idx + generatingImageCount) % 3 === 0
+                                ? "col-span-2 row-span-2"
+                                : ""
                             }`}
                           >
                             <GeneratedImage
@@ -198,4 +220,8 @@ export default function GalleryPage() {
         )}
     </>
   );
+}
+
+function emptyArray(count: number) {
+  return Array.from(Array(count).keys());
 }

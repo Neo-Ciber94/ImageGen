@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { BsSearch } from "react-icons/bs";
 import { useAtom } from "jotai";
 import { api } from "~/utils/api";
@@ -7,6 +8,8 @@ import { generateImageSearchBarAtom } from "~/atoms/promptTextAtom";
 import { useMediaQuery } from "~/hooks/useMediaQuery";
 import { useEffect } from "react";
 import { getTRPCValidationError } from "~/utils/getTRPCValidationError";
+import { generatingImageAtom } from "~/atoms/generatingImageAtom";
+import { MAX_IMAGE_COUNT } from "~/common/constants";
 
 export interface InputSearchBarProps {
   afterGenerate?: () => void;
@@ -15,7 +18,8 @@ export interface InputSearchBarProps {
 export default function GenerateImageSearchBar({
   afterGenerate,
 }: InputSearchBarProps) {
-  const isBigScreen = useMediaQuery("(min-width: 640px)");
+  const isMediumBreakpoint = useMediaQuery("(min-width: 640px)");
+  const [_, setGeneratingImage] = useAtom(generatingImageAtom);
   const generateImage = api.images.generateImage.useMutation();
   const apiContext = api.useContext();
   const [searchBarState, setSearchBarState] = useAtom(
@@ -23,11 +27,11 @@ export default function GenerateImageSearchBar({
   );
 
   useEffect(() => {
-    if (isBigScreen) {
+    if (isMediumBreakpoint) {
       // When the screen is small we remove all the newline in the current prompt to make it fit in one-line
       setSearchBarState((x) => ({ ...x, text: x.text.replace(/\n/g, " ") }));
     }
-  }, [isBigScreen, setSearchBarState]);
+  }, [isMediumBreakpoint, setSearchBarState]);
 
   const handleGenerate = async () => {
     const toastPromise = deferred<void>();
@@ -39,6 +43,7 @@ export default function GenerateImageSearchBar({
     });
 
     setSearchBarState((p) => ({ ...p, loading: true }));
+    setGeneratingImage(MAX_IMAGE_COUNT);
 
     try {
       const result = await generateImage.mutateAsync({
@@ -60,6 +65,7 @@ export default function GenerateImageSearchBar({
       toastPromise.reject(err);
     } finally {
       setSearchBarState((p) => ({ ...p, loading: false }));
+      setGeneratingImage(0);
     }
   };
 
@@ -78,13 +84,13 @@ export default function GenerateImageSearchBar({
           id="generate-search-bar"
           className="w-full resize-none overflow-auto overflow-x-hidden whitespace-normal bg-transparent outline-none
           placeholder:italic dark:placeholder:text-violet-300 sm:overflow-hidden sm:whitespace-nowrap"
-          rows={isBigScreen ? 1 : 4}
+          rows={isMediumBreakpoint ? 1 : 4}
           placeholder="Generate or search..."
           value={searchBarState.text}
           disabled={generateImage.isLoading}
           onInput={(e) => {
             let newText = e.currentTarget.value;
-            if (isBigScreen) {
+            if (isMediumBreakpoint) {
               newText = newText.replace(/\n/g, " ");
             }
             setSearchBarState((p) => ({ ...p, text: newText }));
