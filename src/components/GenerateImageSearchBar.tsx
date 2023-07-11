@@ -3,7 +3,6 @@ import { BsSearch } from "react-icons/bs";
 import { useAtom } from "jotai";
 import { api } from "~/utils/api";
 import toast from "react-hot-toast";
-import { deferred } from "~/utils/promises";
 import { generateImageSearchBarAtom } from "~/atoms/promptTextAtom";
 import { useMediaQuery } from "~/hooks/useMediaQuery";
 import { useEffect } from "react";
@@ -34,14 +33,6 @@ export default function GenerateImageSearchBar({
   }, [isMediumBreakpoint, setSearchBarState]);
 
   const handleGenerate = async () => {
-    const toastPromise = deferred<void>();
-    void toast.promise(toastPromise.promise, {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-      error: (err) => err?.message ?? "Something went wrong",
-      loading: "Generating...",
-      success: "Image generated",
-    });
-
     setSearchBarState((p) => ({ ...p, loading: true }));
     setGeneratingImage(MAX_IMAGE_COUNT);
 
@@ -52,17 +43,15 @@ export default function GenerateImageSearchBar({
       setSearchBarState((p) => ({ ...p, text: "" }));
       await apiContext.images.getAll.invalidate();
       afterGenerate?.();
-      toastPromise.resolve();
       console.log(result);
     } catch (err) {
-      console.error(err);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const trpcError = getTRPCValidationError(err);
       if (trpcError) {
-        return toastPromise.reject(trpcError);
+        return toast.error(trpcError.message);
       }
 
-      toastPromise.reject(err);
+      toast.error("Something went wrong");
     } finally {
       setSearchBarState((p) => ({ ...p, loading: false }));
       setGeneratingImage(0);
