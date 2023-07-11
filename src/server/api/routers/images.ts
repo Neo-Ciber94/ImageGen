@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, isRateLimited, protectedProcedure } from "~/server/api/trpc";
 import { TRPCError } from '@trpc/server';
 import { AI } from '~/server/services/ai';
 import { FileHandler } from '~/server/services/fileHandler';
@@ -30,62 +30,65 @@ export const imagesRouter = createTRPCRouter({
     }),
 
   // Generate a new image
-  generateImage: protectedProcedure.input(z.object({
-    prompt: z.string().trim().min(3).max(MAX_PROMPT_LENGTH)
-  })).mutation(async ({ input: { prompt }, ctx }) => {
+  generateImage: protectedProcedure
+    .use(isRateLimited)
+    .input(z.object({
+      prompt: z.string().trim().min(3).max(MAX_PROMPT_LENGTH)
+    })).mutation(async ({ input: { prompt }, ctx }) => {
 
-    try {
-      const userAccount = await UserAccounts.getOrCreateUserAccount(ctx.user.id);
+      try {
+        const userAccount = await UserAccounts.getOrCreateUserAccount(ctx.user.id);
 
-      if (!userAccount.isUnlimited && userAccount.imageGenerationTokens <= 0) {
+        if (!userAccount.isUnlimited && userAccount.imageGenerationTokens <= 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: "You don't have enough tokens to generate images"
+          })
+        }
+
+        const moderation = await AI.moderateContent(prompt);
+
+        if (moderation.isFlagged) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: "The given prompt had been flagged as invalid"
+          });
+        }
+
+        const images = await AI.generateImages({ prompt, count: MAX_IMAGE_COUNT, userId: ctx.user.id });
+        const blobs = images.map(img => img.blob);
+        const imageResult = await FileHandler.uploadFiles(blobs, {
+          metadata: {
+            userId: ctx.user.id,
+            prompt
+          }
+        });
+
+        // Add generated images to the user
+        const input = imageResult.map(x => ({ key: x.key, prompt }));
+        await GeneratedImages.saveGeneratedImages(ctx.user.id, input)
+
+        if (!userAccount.isUnlimited) {
+          // Decrement tokens count
+          await UserAccounts.decrementTokenCount(ctx.user.id, MAX_IMAGE_COUNT);
+        }
+
+        return imageResult.map(x => x.url);
+      }
+      catch (err) {
+        console.error(err);
+        const message = err instanceof Error ? err.message : err?.toString() ?? "Something went wrong";
         throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: "You don't have enough tokens to generate images"
+          code: 'INTERNAL_SERVER_ERROR',
+          cause: err,
+          message
         })
       }
-
-      const moderation = await AI.moderateContent(prompt);
-
-      if (moderation.isFlagged) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: "The given prompt had been flagged as invalid"
-        });
-      }
-
-      const images = await AI.generateImages({ prompt, count: MAX_IMAGE_COUNT, userId: ctx.user.id });
-      const blobs = images.map(img => img.blob);
-      const imageResult = await FileHandler.uploadFiles(blobs, {
-        metadata: {
-          userId: ctx.user.id,
-          prompt
-        }
-      });
-
-      // Add generated images to the user
-      const input = imageResult.map(x => ({ key: x.key, prompt }));
-      await GeneratedImages.saveGeneratedImages(ctx.user.id, input)
-
-      if (!userAccount.isUnlimited) {
-        // Decrement tokens count
-        await UserAccounts.decrementTokenCount(ctx.user.id, MAX_IMAGE_COUNT);
-      }
-
-      return imageResult.map(x => x.url);
-    }
-    catch (err) {
-      console.error(err);
-      const message = err instanceof Error ? err.message : err?.toString() ?? "Something went wrong";
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        cause: err,
-        message
-      })
-    }
-  }),
+    }),
 
   // Delete image
   deleteImage: protectedProcedure
+    .use(isRateLimited)
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input: { id }, ctx }) => {
       const result = await GeneratedImages.deleteImage(ctx.user.id, id);

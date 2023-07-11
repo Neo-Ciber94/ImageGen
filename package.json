@@ -26,6 +26,7 @@
     "@trpc/next": "^10.26.0",
     "@trpc/react-query": "^10.26.0",
     "@trpc/server": "^10.26.0",
+    "@upstash/ratelimit": "^0.4.3",
     "@upstash/redis": "^1.22.0",
     "color": "^4.2.3",
     "contrast-color": "^1.0.1",

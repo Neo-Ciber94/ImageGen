@@ -14,7 +14,7 @@ import { useDebounce } from "~/hooks/useDebounce";
 import { AnimatePresence, motion } from "framer-motion";
 import { AnimatedPage } from "~/components/AnimatedPage";
 import { getTRPCValidationError } from "~/utils/getTRPCValidationError";
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
 import { MdOutlineHideImage } from "react-icons/md";
 import { FallingLines } from "react-loader-spinner";
@@ -51,6 +51,11 @@ export default function GalleryPage() {
       },
     }
   );
+
+  const isEmpty = useMemo(() => {
+    const firstPage = data?.pages?.[0];
+    return firstPage == null || firstPage.images.length === 0;
+  }, [data?.pages]);
 
   useEffect(() => {
     if (inView && hasNextPage) {
@@ -91,6 +96,7 @@ export default function GalleryPage() {
     }
   };
 
+  console.log(data?.pages);
   return (
     <>
       <Head>
@@ -122,20 +128,17 @@ export default function GalleryPage() {
             </p>
           )}
 
-          {!isGenerateImageLoading &&
-            !isLoading &&
-            data &&
-            data.pages.length === 0 && (
-              <h1
-                onClick={() => {
-                  setRandomSearchTerm();
-                }}
-                className="mt-20 flex w-full cursor-pointer select-none flex-row justify-center p-4 
+          {!isGenerateImageLoading && !isLoading && isEmpty && (
+            <h1
+              onClick={() => {
+                setRandomSearchTerm();
+              }}
+              className="mt-20 flex w-full cursor-pointer select-none flex-row justify-center p-4 
                 text-xl text-violet-300 transition duration-200 hover:text-violet-400 sm:text-2xl md:text-4xl"
-              >
-                No Images found, generate one?
-              </h1>
-            )}
+            >
+              No Images found, generate one?
+            </h1>
+          )}
 
           <div className="grid grid-flow-row-dense grid-cols-2 gap-2 px-2 pb-2 pt-6 md:gap-6 md:px-8 lg:grid-cols-5">
             {data &&
@@ -152,11 +155,12 @@ export default function GalleryPage() {
                             duration: 0.25,
                             delay: 0.08 * idx,
                           }}
-                          className={`relative mb-auto h-full
-                        w-full animate-pulse rounded-lg bg-violet-500/30  ${
-                          idx % 3 === 0 ? "col-span-2 row-span-2" : ""
-                        }`}
-                        ></motion.div>
+                          className={`${
+                            idx % 3 === 0 ? "col-span-2 row-span-2" : ""
+                          }`}
+                        >
+                          <Placeholder />
+                        </motion.div>
                       </AnimatePresence>
                     ))}
 
@@ -219,6 +223,39 @@ export default function GalleryPage() {
           </div>
         )}
     </>
+  );
+}
+
+function Placeholder() {
+  function drawTransparentImage(width: number, height: number) {
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+
+    if (context == null) {
+      throw new Error("failed to get context");
+    }
+
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "rgba(0, 0, 0, 0)";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    const base64Image = canvas.toDataURL();
+    canvas.remove();
+    return base64Image;
+  }
+
+  const imgBase64 = useMemo(() => drawTransparentImage(512, 512), []);
+
+  return (
+    <div className="h-full w-full">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        className="h-full w-full animate-pulse rounded-lg bg-violet-500/30 object-contain"
+        src={imgBase64}
+        alt="placeholder"
+      />
+    </div>
   );
 }
 

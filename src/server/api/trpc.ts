@@ -11,6 +11,7 @@ import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { type User, getAuth, clerkClient } from "@clerk/nextjs/server";
+import { ratelimiter } from "~/utils/rateLimiter";
 
 /**
  * 1. CONTEXT
@@ -113,6 +114,27 @@ export const isAuthenticated = middleware(async (opts) => {
     },
   });
 });
+
+export const isRateLimited = middleware(async opts => {
+  const { ctx } = opts;
+
+  if (ctx.user == null) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' })
+  }
+
+  const rateLimitResult = await ratelimiter.limit(ctx.user.id);
+
+  if (rateLimitResult.success === false) {
+    console.error(`Too many requests from user: ${ctx.user.id}`);
+    throw new TRPCError({ code: 'TOO_MANY_REQUESTS' });
+  }
+
+  return opts.next({
+    ctx: {
+      user: ctx.user,
+    },
+  });
+})
 
 
 /**
