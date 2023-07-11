@@ -7,7 +7,7 @@ export default function Page() {
 
   if (!isLoaded) {
     return (
-      <p className="flex w-full flex-row justify-center p-10 text-purple-500">
+      <div className="flex w-full flex-row justify-center p-10 text-purple-500">
         <ThreeDots
           height="80"
           width="80"
@@ -15,7 +15,7 @@ export default function Page() {
           color="rgb(168 85 247)"
           ariaLabel="loading"
         />
-      </p>
+      </div>
     );
   }
 
