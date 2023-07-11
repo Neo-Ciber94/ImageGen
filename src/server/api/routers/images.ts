@@ -1,13 +1,10 @@
 import { z } from 'zod';
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { TRPCError } from '@trpc/server';
-import { generateImages, moderateContent } from '~/server/common/ai';
-import { getImageUrl, uploadFiles } from '~/server/common/fileManager';
+import { generateImages, moderateContent } from '~/server/services/ai';
+import { deleteFile, getImageUrl, uploadFiles } from '~/server/services/fileHandler';
 import { GeneratedImages, UserAccounts } from '~/server/db/repositories';
-
-const IMAGE_COUNT = 1;
-const MAX_PROMPT_LENGTH = 800;
-const DEFAULT_LIMIT = 100;
+import { MAX_IMAGE_COUNT, MAX_PROMPT_LENGTH } from '~/common/constants';
 
 const getImagesResultScheme = z.object({
   images: z.array(z.object({ id: z.number(), url: z.string(), prompt: z.string(), createdAt: z.date() })),
@@ -25,8 +22,8 @@ export const imagesRouter = createTRPCRouter({
     .output(getImagesResultScheme)
     .query(async ({ ctx, input }) => {
       const { search, cursor } = input;
-      const limit = input.limit ?? DEFAULT_LIMIT;
-      
+      const limit = input.limit ?? 100;
+
       const result = await GeneratedImages.getAllImages(ctx.user.id, { search, limit, page: cursor });
       const images = result.images.map(x => ({ ...x, url: getImageUrl(x.key) }));
       return { images, nextCursor: result.nextPage }
@@ -56,7 +53,7 @@ export const imagesRouter = createTRPCRouter({
         });
       }
 
-      const images = await generateImages({ prompt, count: IMAGE_COUNT, userId: ctx.user.id });
+      const images = await generateImages({ prompt, count: MAX_IMAGE_COUNT, userId: ctx.user.id });
       const blobs = images.map(img => img.blob);
       const imageResult = await uploadFiles(blobs, {
         metadata: {
@@ -71,7 +68,7 @@ export const imagesRouter = createTRPCRouter({
 
       if (!userAccount.isUnlimited) {
         // Decrement tokens count
-        await UserAccounts.decrementTokenCount(ctx.user.id, IMAGE_COUNT);
+        await UserAccounts.decrementTokenCount(ctx.user.id, MAX_IMAGE_COUNT);
       }
 
       return imageResult.map(x => x.url);
@@ -96,6 +93,8 @@ export const imagesRouter = createTRPCRouter({
       if (result == null) {
         throw new TRPCError({ code: 'NOT_FOUND' });
       }
+
+      await deleteFile(result.key);
 
       return result;
     })
