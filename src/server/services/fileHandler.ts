@@ -55,10 +55,7 @@ export namespace FileHandler {
         }
 
         const result = await Promise.all(uploadFilePromises);
-        const urls = result.map(({ key }) => {
-            const url = new URL(getImageUrl(key))
-            return { url, key };
-        });
+        const urls = result.map(({ key }) => ({ url: getImageUrl(key), key }));
 
         console.log(`${urls.length} files uploaded successfully`, urls);
         return urls;

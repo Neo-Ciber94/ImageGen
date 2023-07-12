@@ -8,7 +8,7 @@ import { useMediaQuery } from "~/hooks/useMediaQuery";
 import { useEffect } from "react";
 import { getTRPCValidationError } from "~/utils/getTRPCValidationError";
 import { generatingImageAtom } from "~/atoms/generatingImageAtom";
-import { MAX_IMAGE_COUNT } from "~/common/constants";
+import { GENERATE_IMAGE_COUNT } from "~/common/constants";
 
 export interface InputSearchBarProps {
   afterGenerate?: () => void;
@@ -34,7 +34,7 @@ export default function GenerateImageSearchBar({
 
   const handleGenerate = async () => {
     setSearchBarState((p) => ({ ...p, loading: true }));
-    setGeneratingImage(MAX_IMAGE_COUNT);
+    setGeneratingImage(GENERATE_IMAGE_COUNT);
 
     try {
       const result = await generateImage.mutateAsync({

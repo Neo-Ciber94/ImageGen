@@ -20,6 +20,8 @@ import { MdOutlineHideImage } from "react-icons/md";
 import { FallingLines } from "react-loader-spinner";
 import ScrollToTop from "~/components/ScrollToTop";
 import { useGeneratingImagesCount } from "~/atoms/generatingImageAtom";
+import { drawImageAsBase64 } from "~/utils/drawImageAsBase64";
+import { QStashImageClient } from "~/utils/qstashImage";
 
 export default function GalleryPage() {
   const apiContext = api.useContext();
@@ -159,7 +161,7 @@ export default function GalleryPage() {
                             idx % 3 === 0 ? "col-span-2 row-span-2" : ""
                           }`}
                         >
-                          <Placeholder />
+                          <ImageLoading />
                         </motion.div>
                       </AnimatePresence>
                     ))}
@@ -226,26 +228,12 @@ export default function GalleryPage() {
   );
 }
 
-function Placeholder() {
-  function drawTransparentImage(width: number, height: number) {
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const context = canvas.getContext("2d");
-
-    if (context == null) {
-      throw new Error("failed to get context");
-    }
-
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = "rgba(0, 0, 0, 0)";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    const base64Image = canvas.toDataURL();
-    canvas.remove();
-    return base64Image;
-  }
-
-  const imgBase64 = useMemo(() => drawTransparentImage(512, 512), []);
+function ImageLoading() {
+  /**
+   * FIXME: I want to make a div behave like an image, but after several tries
+   * I decide to just create an image using the canvas and use it.
+   */
+  const imgBase64 = useMemo(() => drawImageAsBase64(512, 512), []);
 
   return (
     <div className="h-full w-full">

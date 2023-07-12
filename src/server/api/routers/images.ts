@@ -4,12 +4,16 @@ import { TRPCError } from '@trpc/server';
 import { AI } from '~/server/services/ai';
 import { FileHandler } from '~/server/services/fileHandler';
 import { GeneratedImages, UserAccounts } from '~/server/db/repositories';
-import { MAX_IMAGE_COUNT, MAX_PROMPT_LENGTH } from '~/common/constants';
+import { GENERATE_IMAGE_COUNT, MAX_PROMPT_LENGTH } from '~/common/constants';
 
 const getImagesResultScheme = z.object({
   images: z.array(z.object({ id: z.number(), url: z.string(), prompt: z.string(), createdAt: z.date() })),
   nextCursor: z.number().nullish()
 })
+
+export const generateImageInputSchema = z.object({
+  prompt: z.string().trim().min(3).max(MAX_PROMPT_LENGTH)
+});
 
 export const imagesRouter = createTRPCRouter({
   // Get all images
@@ -32,9 +36,8 @@ export const imagesRouter = createTRPCRouter({
   // Generate a new image
   generateImage: protectedProcedure
     .use(isRateLimited)
-    .input(z.object({
-      prompt: z.string().trim().min(3).max(MAX_PROMPT_LENGTH)
-    })).mutation(async ({ input: { prompt }, ctx }) => {
+    .input(generateImageInputSchema)
+    .mutation(async ({ input: { prompt }, ctx }) => {
 
       try {
         const userAccount = await UserAccounts.getOrCreateUserAccount(ctx.user.id);
@@ -55,7 +58,7 @@ export const imagesRouter = createTRPCRouter({
           });
         }
 
-        const images = await AI.generateImages({ prompt, count: MAX_IMAGE_COUNT, userId: ctx.user.id });
+        const images = await AI.generateImages({ prompt, count: GENERATE_IMAGE_COUNT, userId: ctx.user.id });
         const blobs = images.map(img => img.blob);
         const imageResult = await FileHandler.uploadFiles(blobs, {
           metadata: {
@@ -70,7 +73,7 @@ export const imagesRouter = createTRPCRouter({
 
         if (!userAccount.isUnlimited) {
           // Decrement tokens count
-          await UserAccounts.decrementTokenCount(ctx.user.id, MAX_IMAGE_COUNT);
+          await UserAccounts.decrementTokenCount(ctx.user.id, GENERATE_IMAGE_COUNT);
         }
 
         return imageResult.map(x => x.url);

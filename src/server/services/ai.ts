@@ -1,8 +1,9 @@
 import { Configuration, OpenAIApi } from "openai";
+import { GENERATE_IMAGE_SIZE } from "~/common/constants";
 import { env } from '~/env.mjs';
 
 const configuration = new Configuration({
-    apiKey: env.OPEN_API_KEY
+    apiKey: env.OPENAI_API_KEY
 });
 
 const openAi = new OpenAIApi(configuration);
@@ -24,9 +25,9 @@ export namespace AI {
     export async function generateImages({ prompt, userId, count }: GenerateImageOptions) {
         const imageResponse = await openAi.createImage({
             prompt,
-            response_format: 'url',
             n: count,
-            size: '512x512',
+            response_format: 'url',
+            size: GENERATE_IMAGE_SIZE,
             user: userId
         });
 

@@ -12,6 +12,7 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 import { type User, getAuth, clerkClient } from "@clerk/nextjs/server";
 import { ratelimiter } from "~/utils/rateLimiter";
+import { type NextApiRequest } from "next";
 
 /**
  * 1. CONTEXT
@@ -22,7 +23,8 @@ import { ratelimiter } from "~/utils/rateLimiter";
  */
 
 type CreateContextOptions = {
-  user: User | null | undefined
+  user: User | null | undefined,
+  req: NextApiRequest
 }
 
 /**
@@ -56,7 +58,8 @@ export const createTRPCContext = async ({ req }: CreateNextContextOptions) => {
   }
 
   return createInnerTRPCContext({
-    user
+    user,
+    req
   });
 };
 
