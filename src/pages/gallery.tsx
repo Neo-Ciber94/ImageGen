@@ -143,29 +143,27 @@ export default function GalleryPage() {
           )}
 
           <div className="grid grid-flow-row-dense grid-cols-2 gap-2 px-2 pb-2 pt-6 md:gap-6 md:px-8 lg:grid-cols-5">
+            {emptyArray(generatingImageCount).map((idx) => (
+              <AnimatePresence key={`${idx}-placeholder`}>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    type: "sprint",
+                    duration: 0.25,
+                    delay: 0.08 * idx,
+                  }}
+                  className={`${idx % 3 === 0 ? "col-span-2 row-span-2" : ""}`}
+                >
+                  <ImageLoading />
+                </motion.div>
+              </AnimatePresence>
+            ))}
+
             {data &&
               data.pages.map((page, pageIdx) => {
                 return (
                   <Fragment key={pageIdx}>
-                    {emptyArray(generatingImageCount).map((idx) => (
-                      <AnimatePresence key={`${idx}-placeholder`}>
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{
-                            type: "sprint",
-                            duration: 0.25,
-                            delay: 0.08 * idx,
-                          }}
-                          className={`${
-                            idx % 3 === 0 ? "col-span-2 row-span-2" : ""
-                          }`}
-                        >
-                          <ImageLoading />
-                        </motion.div>
-                      </AnimatePresence>
-                    ))}
-
                     {page.images.map((data, idx) => {
                       return (
                         <AnimatePresence key={data.id}>
