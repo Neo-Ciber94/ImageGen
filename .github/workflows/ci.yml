@@ -21,7 +21,7 @@ jobs:
     - run: npm i -g sst
     
     # Install packages
-    - run: npm ci
+    - run: yarn install --frozen-lockfile
     
     # Build app
-    - run: npm run build
+    - run: yarn build
