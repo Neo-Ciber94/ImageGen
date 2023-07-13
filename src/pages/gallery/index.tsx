@@ -21,6 +21,7 @@ import { FallingLines } from "react-loader-spinner";
 import ScrollToTop from "~/components/ScrollToTop";
 import { useGeneratingImagesCount } from "~/atoms/generatingImageAtom";
 import { drawImageAsBase64 } from "~/utils/drawImageAsBase64";
+import Image from "next/image";
 
 // This is for make SST detect this route as dynamic
 export const getServerSideProps = () => {
@@ -243,11 +244,13 @@ function ImageLoading() {
 
   return (
     <div className="h-full w-full">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         className="h-full w-full animate-pulse rounded-lg bg-violet-500/30 object-contain"
         src={imgBase64}
-        alt="placeholder"
+        alt="Loading Image"
+        width={0}
+        height={0}
+        sizes="100vw"
       />
     </div>
   );

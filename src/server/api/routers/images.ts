@@ -76,10 +76,15 @@ export const imagesRouter = createTRPCRouter({
           await UserAccounts.decrementTokenCount(ctx.user.id, GENERATE_IMAGE_COUNT);
         }
 
-        return imageResult.map(x => x.url);
+        return imageResult.map(url => ({ url }));
       }
       catch (err) {
         console.error(err);
+
+        if (err instanceof TRPCError) {
+          throw err;
+        }
+
         const message = err instanceof Error ? err.message : err?.toString() ?? "Something went wrong";
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
@@ -113,4 +118,3 @@ export const imagesRouter = createTRPCRouter({
       return result;
     })
 });
-

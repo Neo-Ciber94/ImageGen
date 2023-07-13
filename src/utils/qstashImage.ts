@@ -1,6 +1,3 @@
-import { delay } from "./delay";
-
-const DEFAULT_TIMEOUT = 1000 * 60 * 3; // 3min
 
 export interface QStashPollOptions {
     messageId: string;
@@ -18,62 +15,53 @@ export namespace QStashImageClient {
             }
         });
 
-        if (!res.ok) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const error = await res.text();
-            throw new Error(error);
-        }
-
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const json: { messageId: string } = await res.json();
-        return json;
-    }
+        const json = await res.json();
 
-    export async function poll({ messageId, timeoutMs = DEFAULT_TIMEOUT }: QStashPollOptions) {
-        const abortController = new AbortController();
-        const signal = abortController.signal;
-
-        const timeoutId = window.setTimeout(() => abortController.abort(), timeoutMs)
-        let started = false;
-
-        while (!signal.aborted) {
-            if (started) {
-                await delay(1000);
-            } else {
-                started = true;
-            }
-
-            const res = await fetch('/api/image/poll', {
-                method: 'POST',
-                body: JSON.stringify({ messageId }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (res.status === 404) {
-                continue;
-            }
-
-            if (!res.ok) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                const error = await res.text();
-                throw new Error(error);
-            }
-
-            window.clearTimeout(timeoutId);
-
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const json: { urls: string[] } = await res.json();
-            return json;
+        if (res.ok) {
+            return json as { messageId: string }
+        } else {
+            const msg = json as { message: string }
+            throw new Error(msg.message)
         }
-
-        // Fallback
-        throw new Error("Timeout");
     }
 
-    export async function generateAndPoll(prompt: string, timeoutMs = DEFAULT_TIMEOUT) {
-        const { messageId } = await generate(prompt);
-        return poll({ messageId, timeoutMs })
+    export async function poll({ messageId }: { messageId: string }) {
+        const MAX_RETRIES = 60 * 2; // 2min 
+        let retries = 0;
+
+        return new Promise<{ urls: string[] }>((resolve, reject) => {
+
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            const intervalId = window.setInterval(async () => {
+                if (retries >= MAX_RETRIES) {
+                    window.clearInterval(intervalId);
+                    reject(new Error(`Timeout after ${retries} seconds`));
+                }
+
+                const res = await fetch('/api/image/poll', {
+                    method: 'POST',
+                    body: JSON.stringify({ messageId }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (res.status === 404) {
+                    retries += 1;
+                    return;
+                }
+
+                window.clearInterval(intervalId);
+
+                if (!res.ok) {
+                    const { message } = (await res.json()) as { message: string }
+                    reject(new Error(message));
+                } else {
+                    const { urls } = (await res.json()) as { urls: string[] }
+                    resolve({ urls })
+                }
+            }, 1000)
+        })
     }
 }
