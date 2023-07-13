@@ -21,7 +21,11 @@ import { FallingLines } from "react-loader-spinner";
 import ScrollToTop from "~/components/ScrollToTop";
 import { useGeneratingImagesCount } from "~/atoms/generatingImageAtom";
 import { drawImageAsBase64 } from "~/utils/drawImageAsBase64";
-import { QStashImageClient } from "~/utils/qstashImage";
+
+// This is for make SST detect this route as dynamic
+export const getServerSideProps = () => {
+  return Promise.resolve({ props: {} });
+};
 
 export default function GalleryPage() {
   const apiContext = api.useContext();
@@ -98,7 +102,11 @@ export default function GalleryPage() {
     }
   };
 
-  console.log(data?.pages);
+  const placeholderArray = useMemo(
+    () => Array.from(Array(generatingImageCount).keys()),
+    [generatingImageCount]
+  );
+
   return (
     <>
       <Head>
@@ -143,7 +151,7 @@ export default function GalleryPage() {
           )}
 
           <div className="grid grid-flow-row-dense grid-cols-2 gap-2 px-2 pb-2 pt-6 md:gap-6 md:px-8 lg:grid-cols-5">
-            {emptyArray(generatingImageCount).map((idx) => (
+            {placeholderArray.map((idx) => (
               <AnimatePresence key={`${idx}-placeholder`}>
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -243,8 +251,4 @@ function ImageLoading() {
       />
     </div>
   );
-}
-
-function emptyArray(count: number) {
-  return Array.from(Array(count).keys());
 }

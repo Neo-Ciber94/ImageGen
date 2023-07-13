@@ -169,28 +169,32 @@ async function handleCallback(req: NextApiRequest, res: NextApiResponse) {
         if (true) {
             const openAiResponse = openAiResponseSchema.safeParse(JSON.parse(decoded));
             if (openAiResponse.success === false) {
-                //return res.status(500).json({ message: "Invalid open ai response" });
+                return res.status(500).json({ message: "Invalid open ai response" });
             }
 
             console.log(openAiResponse);
-            // const blobs: Blob[] = [];
-            // for (const data of openAiResponse.data.data) {
-            //     const decodedImage = atob(data.url);
-            //     const bytes = encoder.encode(decodedImage);
-            //     const blob = new Blob([bytes]);
-            //     blobs.push(blob);
-            // }
+            const blobs: Blob[] = [];
+            for (const data of openAiResponse.data.data) {
+                const decodedImage = atob(data.url);
+                const bytes = encoder.encode(decodedImage);
+                const blob = new Blob([bytes]);
+                blobs.push(blob);
+            }
 
-            // if (blobs.length === 0) {
-            //     return res.status(500).json({ message: "No images to upload" });
-            // }
+            if (blobs.length === 0) {
+                return res.status(500).json({ message: "No images to upload" });
+            }
 
-            // await FileHandler.uploadFiles(blobs, {
-            //     metadata: {
-            //         prompt: messageData.prompt,
-            //         userId: messageData.userId
-            //     }
-            // })
+            const uploadResult = await FileHandler.uploadFiles(blobs, {
+                metadata: {
+                    prompt: messageData.prompt,
+                    userId: messageData.userId
+                }
+            });
+
+            for (const uploaded of uploadResult) {
+
+            }
         }
 
         res.status(200).json(decoded);
