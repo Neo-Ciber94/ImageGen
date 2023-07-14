@@ -13,8 +13,7 @@ export default {
     app.stack(function Site({ stack }) {
       const site = new NextjsSite(stack, "ImageGenSite", {
         environment: {
-          ...env,
-          SERVER_URL: "https://du8ecttu3enax.cloudfront.net"
+          ...env
         },
       });
 
@@ -22,5 +21,9 @@ export default {
         SiteUrl: site.url,
       });
     });
+
+    app.setDefaultFunctionProps({
+      logRetention: 'one_week'
+    })
   },
 } satisfies SSTConfig;
