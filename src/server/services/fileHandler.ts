@@ -3,7 +3,7 @@ import { env } from "~/env.mjs";
 import { nanoid } from 'nanoid';
 
 const s3Client = new S3Client({
-    credentials: {
+    credentials: {        
         accessKeyId: env.MY_AWS_ACCESS_KEY_ID,
         secretAccessKey: env.MY_AWS_SECRET_KEY,
     },
