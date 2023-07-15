@@ -1,28 +1,49 @@
-# Create T3 App
+# ImageGen
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+[![CI](https://github.com/Neo-Ciber94/ImageGen/actions/workflows/ci.yml/badge.svg)](https://github.com/Neo-Ciber94/ImageGen/actions/workflows/ci.yml)
 
-## What's next? How do I make an app with this?
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+An AI image generator gallery.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+> Website: <https://du8ecttu3enax.cloudfront.net/>
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
 
-## Learn More
+## Features
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+- [x] Generate Images using AI
+- [x] Search images by its prompt
+- [x] Preview generated images and see the prompt used
+- [x] Dark Mode
+- [x] Rate limiting
+- [x] Auth
+  - [x] Google
+  - [ ] Github
+  - [ ] Discord
+- [x] Images saved to S3 and distributed thought Cloudfront
+- [x] Prompt improvement system
+  - User can improve a prompt for a more detailed
+- [x] Token system
+  - User require to use tokens to generate images
+- [ ] Token regeneration System
+  - Each X days the user recover tokens
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+## Stack
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+- NextJS
+- T3 Stack (TRPC, Typescript, TailwindCSS)
+- Drizzle ORM *(With PostgreSQL)*
+- HeadlessUI
+- Clerk
+- OpenAI
+- AWS (S3, Cloudfront)
 
-## How do I deploy this?
+The deployment is done using `SST` which involve using AWS.
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+
+## Screenshots
+
+![Home](./assets/images/home_dark.png)
+
+![Gallery](./assets/images/gallery_dark.png)
+
+------------------------
