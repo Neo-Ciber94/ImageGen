@@ -1,9 +1,12 @@
 import { SignUp, useUser } from "@clerk/nextjs";
 import { ThreeDots } from "react-loader-spinner";
 import Redirect from "~/components/Redirect";
+import { dark } from "@clerk/themes";
+import { useDarkMode } from "~/hooks/useDarkMode";
 
 export default function Page() {
   const { isSignedIn, isLoaded } = useUser();
+  const { isDark } = useDarkMode();
 
   if (!isLoaded) {
     return (
@@ -23,5 +26,13 @@ export default function Page() {
     return <Redirect to="/gallery" />;
   }
 
-  return <SignUp redirectUrl={window.location.origin} />;
+  return (
+    <div className="mt-10 flex flex-row items-center justify-center p-4">
+      <SignUp
+        appearance={{
+          baseTheme: isDark ? dark : undefined,
+        }}
+      />
+    </div>
+  );
 }
