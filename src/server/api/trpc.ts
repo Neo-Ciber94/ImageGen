@@ -11,8 +11,9 @@ import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { type User, getAuth, clerkClient } from "@clerk/nextjs/server";
-import { ratelimiter } from "~/utils/rateLimiter";
+import { type Limiter, createRateLimiter } from "~/utils/rateLimiter";
 import { type NextApiRequest } from "next";
+import { Ratelimit } from "@upstash/ratelimit";
 
 /**
  * 1. CONTEXT
@@ -118,27 +119,36 @@ export const isAuthenticated = middleware(async (opts) => {
   });
 });
 
-export const isRateLimited = middleware(async opts => {
-  const { ctx } = opts;
+export function createRateLimiterMiddleware(name: string, limiter: Limiter, message?: string) {
+  return middleware(async opts => {
+    const { ctx } = opts;
 
-  if (ctx.user == null) {
-    throw new TRPCError({ code: 'UNAUTHORIZED' })
-  }
+    if (ctx.user == null) {
+      throw new TRPCError({ code: 'UNAUTHORIZED' })
+    }
 
-  const rateLimitResult = await ratelimiter.limit(ctx.user.id);
+    const rateLimiter = createRateLimiter(name, limiter);
+    const rateLimitResult = await rateLimiter.limit(ctx.user.id);
 
-  if (rateLimitResult.success === false) {
-    console.error(`Too many requests from user: ${ctx.user.id}`);
-    throw new TRPCError({ code: 'TOO_MANY_REQUESTS' });
-  }
+    if (rateLimitResult.success === false) {
+      console.error(`Too many requests from user: ${ctx.user.id}`);
+      throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message });
+    }
 
-  return opts.next({
-    ctx: {
-      user: ctx.user,
-    },
-  });
-})
+    return opts.next({
+      ctx: {
+        user: ctx.user,
+      },
+    });
+  })
+}
 
+// 5 requests per 5 seconds
+export const isRateLimited = createRateLimiterMiddleware("default", Ratelimit.slidingWindow(5, "5 s"))
+
+// 10 tokens each 15 minutes
+export const isPromptImprovementRateLimited =
+  createRateLimiterMiddleware("prompt", Ratelimit.tokenBucket(10, "15 m", 10), "You have done too much prompts improvements")
 
 /**
  * Public (unauthenticated) procedure

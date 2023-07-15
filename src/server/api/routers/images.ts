@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createTRPCRouter, isRateLimited, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, isRateLimited, isPromptImprovementRateLimited, protectedProcedure } from "~/server/api/trpc";
 import { TRPCError } from '@trpc/server';
 import { AI } from '~/server/services/ai';
 import { FileHandler } from '~/server/services/fileHandler';
@@ -120,7 +120,7 @@ export const imagesRouter = createTRPCRouter({
 
   // Improve a text prompt
   improvePrompt: protectedProcedure
-    .use(isRateLimited)
+    .use(isPromptImprovementRateLimited)
     .input(generateImageInputSchema)
     .mutation(async ({ input: { prompt }, ctx }) => {
       try {
