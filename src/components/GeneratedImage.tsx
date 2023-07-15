@@ -24,11 +24,19 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
   const [open, setOpen] = useState(false);
   const [displayColors, setDisplayColors] = useState<ImageDisplayColor>();
 
+  const handleOpen = () => {
+    setOpen(true);
+  }
+
+  const handleClose = () => {
+    setOpen(false);
+  }
+
   return (
     <>
       <div className="relative">
         <div
-          onClick={() => setOpen(true)}
+          onClick={handleOpen}
           className="group relative cursor-pointer overflow-hidden rounded-lg border 
         border-gray-200/50 shadow-md transition-all duration-200 hover:shadow-lg 
         dark:border-white/10 dark:hover:shadow-violet-400/20"
@@ -52,7 +60,7 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
           url={img.url}
           prompt={img.prompt}
           onDelete={onDelete}
-          onClose={() => setOpen(false)}
+          onClose={handleClose}
           displayColors={
             displayColors ?? { bgColor: "black", fgColor: "white" }
           }
@@ -152,7 +160,10 @@ function PreviewImage({
                   navigator.clipboard
                     .writeText(prompt)
                     .then(() =>
-                      toast.success("Copied to clipboard", { id: "clipboard", icon: '✏️' })
+                      toast.success("Copied to clipboard", {
+                        id: "clipboard",
+                        icon: "✏️",
+                      })
                     )
                     .catch(console.error);
 

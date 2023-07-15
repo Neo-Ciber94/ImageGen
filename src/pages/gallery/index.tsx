@@ -110,10 +110,8 @@ export default function GalleryPage() {
 
   return (
     <>
-      <NextSeo
-        title="Gallery"
-      />
-      
+      <NextSeo title="Gallery" />
+
       <AnimatedPage>
         <div className="relative p-4">
           <div className={`z-10 w-full px-2 py-2 md:px-10`}>
