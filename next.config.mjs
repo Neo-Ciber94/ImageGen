@@ -1,4 +1,5 @@
 import { env } from "./src/env.mjs";
+import nextPWA from "next-pwa";
 
 /**
  * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
@@ -9,6 +10,11 @@ await import("./src/env.mjs");
 if (process.env.NEXT_OUTPUT) {
   console.log(`Build output: ${process.env.NEXT_OUTPUT}`);
 }
+
+const withPWA = nextPWA({
+  dest: "public",
+  // disable: process.env.NODE_ENV === 'development'
+});
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -44,4 +50,4 @@ const config = {
   },
 };
 
-export default config;
+export default withPWA(config);

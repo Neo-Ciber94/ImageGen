@@ -1,5 +1,4 @@
 import { useUser } from "@clerk/nextjs";
-import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { BsHeart } from "react-icons/bs";
@@ -13,10 +12,6 @@ export default function HomePage() {
 
   return (
     <>
-      <Head>
-        <title>ImageGen | Home</title>
-      </Head>
-
       <AnimatedPage>
         <div className="mx:mx-20 mx-4 mt-10 flex flex-col justify-center gap-4 p-4 lg:flex-row xl:mx-40">
           <div className="w-full lg:w-5/12">

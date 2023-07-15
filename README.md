@@ -42,8 +42,8 @@ The deployment is done using `SST` which involve using AWS.
 
 ## Screenshots
 
-![Home](./assets/images/home_dark.png)
+![Home](./public/screenshots/home_dark.png)
 
-![Gallery](./assets/images/gallery_dark.png)
+![Gallery](./public/screenshots/gallery_dark.png)
 
 ------------------------

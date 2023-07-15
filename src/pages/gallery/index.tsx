@@ -1,4 +1,3 @@
-import Head from "next/head";
 import GenerateImageSearchBar from "~/components/GenerateImageSearchBar";
 import {
   useIsGeneratingImage,
@@ -22,6 +21,7 @@ import ScrollToTop from "~/components/ScrollToTop";
 import { useGeneratingImagesCount } from "~/atoms/generatingImageAtom";
 import { drawImageAsBase64 } from "~/utils/drawImageAsBase64";
 import Image from "next/image";
+import { NextSeo } from "next-seo";
 
 // This is for make SST detect this route as dynamic
 export const getServerSideProps = () => {
@@ -110,10 +110,10 @@ export default function GalleryPage() {
 
   return (
     <>
-      <Head>
-        <title>ImageGen | Gallery</title>
-      </Head>
-
+      <NextSeo
+        title="Gallery"
+      />
+      
       <AnimatedPage>
         <div className="relative p-4">
           <div className={`z-10 w-full px-2 py-2 md:px-10`}>

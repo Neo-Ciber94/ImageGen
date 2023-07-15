@@ -27,6 +27,10 @@ next-env.d.ts
 .open-next
 private
 
+# sw
+sw.js*
+workbox-*.js*
+
 # debug
 npm-debug.log*
 yarn-debug.log*
