@@ -1,6 +1,7 @@
 import { atom, useAtom } from "jotai";
 import { useCallback } from "react";
 
+// Atom used by the input bar to generate or search images
 export const generateImageSearchBarAtom = atom({
     text: "",
     loading: false

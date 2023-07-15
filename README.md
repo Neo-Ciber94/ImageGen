@@ -13,6 +13,7 @@ An AI image generator gallery.
 - [x] Generate Images using AI
 - [x] Search images by its prompt
 - [x] Preview generated images and see the prompt used
+- [x] Delete images
 - [x] Dark Mode
 - [x] Rate limiting
 - [x] Auth
@@ -38,7 +39,6 @@ An AI image generator gallery.
 - AWS (S3, Cloudfront)
 
 The deployment is done using `SST` which involve using AWS.
-
 
 ## Screenshots
 

@@ -1,5 +1,6 @@
 import { Html, Head, Main, NextScript } from "next/document";
 
+// This is a trick to ensure the dark theme before loading the scripts
 const JS_SCRIPT = /* javascript */ `
   const systemIsDarkMode = window.matchMedia('(prefers-color-scheme: dark)');
   const theme = localStorage.getItem('theme');
