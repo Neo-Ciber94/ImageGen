@@ -27,10 +27,17 @@ export default function Page() {
   }
 
   return (
-    <div className="mt-10 flex flex-row items-center justify-center p-4">
+    <div className="mt-10 flex flex-row items-center justify-center py-4">
       <SignUp
         appearance={{
           baseTheme: isDark ? dark : undefined,
+          elements: {
+            card: "dark:bg-slate-950 dark:text-white border dark:border-violet-400/30",
+            footer: "hidden",
+          },
+          variables: {
+            colorText: isDark ? "white" : undefined,
+          },
         }}
       />
     </div>
