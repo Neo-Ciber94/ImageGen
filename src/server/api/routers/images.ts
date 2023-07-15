@@ -124,15 +124,6 @@ export const imagesRouter = createTRPCRouter({
     .input(generateImageInputSchema)
     .mutation(async ({ input: { prompt }, ctx }) => {
       try {
-        const userAccount = await UserAccounts.getOrCreateUserAccount(ctx.user.id);
-
-        if (!userAccount.isUnlimited && userAccount.imageGenerationTokens <= 0) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: "You don't have enough tokens to improve prompts"
-          })
-        }
-
         const moderation = await AI.moderateContent(prompt);
 
         if (moderation.isFlagged) {
@@ -143,12 +134,6 @@ export const imagesRouter = createTRPCRouter({
         }
 
         const improvedPrompt = await AI.improveImagePrompt({ prompt, userId: ctx.user.id });
-
-        if (!userAccount.isUnlimited) {
-          // Decrement tokens count
-          await UserAccounts.decrementTokenCount(ctx.user.id, GENERATE_IMAGE_COUNT);
-        }
-
         return improvedPrompt;
       }
       catch (err) {
