@@ -37,6 +37,9 @@ const config = {
       {
         hostname: "dba8sid543nft.cloudfront.net",
       },
+      {
+        hostname: "img.clerk.com",
+      },
     ],
   },
 };

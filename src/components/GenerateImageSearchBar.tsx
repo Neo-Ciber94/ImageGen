@@ -42,6 +42,7 @@ export default function GenerateImageSearchBar({
       });
       setSearchBarState((p) => ({ ...p, text: "" }));
       await apiContext.images.getAll.invalidate();
+      await apiContext.users.getTokenCount.invalidate();
       afterGenerate?.();
       console.log(result);
     } catch (err) {

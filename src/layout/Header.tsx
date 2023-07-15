@@ -7,6 +7,11 @@ import { BiImage } from "react-icons/bi";
 import DarkModeToggle from "~/components/DarkModeToggle";
 import { ForEachCharacter } from "~/components/ForEachCharacter";
 import LoadingIndicator from "~/components/LoadingIndicator";
+import ImageWithFallback from "~/components/ImageWithFallback";
+import { useMemo } from "react";
+import { Menu } from "@headlessui/react";
+import { MdOutlineGeneratingTokens } from "react-icons/md";
+import { api } from "~/utils/api";
 
 const font = Lato({
   weight: ["700"],
@@ -58,10 +63,56 @@ interface UserAvatarProps {
 }
 
 function UserAvatar({ user }: UserAvatarProps) {
+  const name = user.username || user.firstName || "User";
+  const fallbackImg = useMemo(
+    () => `https://placehold.co/64x64/9333ea/FFF?text=${name.slice(0, 2)}`,
+    [name]
+  );
+
+  const tokenCountQuery = api.users.getTokenCount.useQuery();
+
   return (
-    <div className="overflow-hidden rounded-full shadow">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img alt="User" src={user.imageUrl} width={30} height={30} />
-    </div>
+    <Menu>
+      <Menu.Button>
+        <div className="overflow-hidden rounded-full shadow">
+          <ImageWithFallback
+            alt={name}
+            src={user.imageUrl}
+            quality={100}
+            fallbackSrc={fallbackImg}
+            width={30}
+            height={30}
+          />
+        </div>
+      </Menu.Button>
+      <Menu.Items
+        as="ul"
+        className="absolute right-14 top-14 z-40 flex flex-col gap-2 overflow-hidden rounded-lg border border-gray-200 
+        bg-white p-1 shadow-md dark:border-violet-900/50 dark:bg-slate-900 dark:shadow-sm dark:shadow-violet-400/10"
+      >
+        <Menu.Item
+          as="li"
+          className="flex cursor-pointer flex-row items-center gap-4 rounded-lg px-5 py-2 hover:bg-violet-500 hover:text-white"
+        >
+          <MdOutlineGeneratingTokens className="text-2xl" />
+          {tokenCountQuery.isLoading && (
+            <div className="px-10">
+              <LoadingIndicator size={30} />
+            </div>
+          )}
+          <span className="font-medium">
+            {tokenCountQuery.data != null && (
+              <>
+                {tokenCountQuery.data === "unlimited"
+                  ? "Unlimited tokens"
+                  : `${tokenCountQuery.data} ${
+                      tokenCountQuery.data === 1 ? "token" : "tokens"
+                    } left`}
+              </>
+            )}
+          </span>
+        </Menu.Item>
+      </Menu.Items>
+    </Menu>
   );
 }
