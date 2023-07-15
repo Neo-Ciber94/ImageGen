@@ -19,8 +19,6 @@ export const env = createEnv({
     // Upstash
     UPSTASH_REDIS_REST_URL: z.string(),
     UPSTASH_REDIS_REST_TOKEN: z.string(),
-    QSTASH_URL: z.string(),
-    QSTASH_TOKEN: z.string(),
 
     // AWS Keys
     MY_AWS_ACCESS_KEY_ID: z.string(),
@@ -56,8 +54,6 @@ export const env = createEnv({
     MY_AWS_BUCKET_NAME: process.env.MY_AWS_BUCKET_NAME,
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
-    QSTASH_URL: process.env.QSTASH_URL,
-    QSTASH_TOKEN: process.env.QSTASH_TOKEN,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
