@@ -1,5 +1,13 @@
 {
     "tailwindCSS.experimental.classRegex": [
-        "(?:enter|leave)(?:From|To)?=\\s*(?:\"|'|{`)([^(?:\"|'|`})]*)"
+        [
+            "(?:enter|leave)(?:From|To)?=\\s*(?:\"|'|{`)([^(?:\"|'|`})]*)"
+        ],
+        [
+            ":\\s*?[\"'`]([^\"'`]*).*?,"
+        ],
+        [
+            "wrapperClass=\\s*?[\"'`]([^\"'`]*).*?"
+        ]
     ]
 }

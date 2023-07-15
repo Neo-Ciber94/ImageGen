@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { Configuration, OpenAIApi } from "openai";
 import { GENERATE_IMAGE_SIZE } from "~/common/constants";
 import { env } from '~/env.mjs';
@@ -86,6 +87,39 @@ export namespace AI {
             isFlagged
         }
     }
+
+    export async function improveImagePrompt({ prompt, userId }: { prompt: string, userId: string }) {
+        const ERROR_MESSAGE = "[INVALID PROMPT]";
+        const response = await openAi.createChatCompletion({
+            model: 'gpt-3.5-turbo',
+            user: userId,
+            temperature: 1.6,
+            messages: [
+                {
+                    role: 'system',
+                    content: `You are an assistant that improve image generation prompts, for each
+                    prompt you return a improved and more detailed version and not other details but if the prompt makes no
+                    sense to proccess just return: ${ERROR_MESSAGE}.`
+                },
+                {
+                    role: 'assistant',
+                    content: prompt
+                }
+            ]
+        });
+
+        const data = response.data;
+        const choice = data.choices[0];
+        const content = choice?.message?.content;
+
+        if (content == null) {
+            throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: "Invalid OpenAI response" });
+        }
+
+        if (content.trim() === ERROR_MESSAGE) {
+            throw new TRPCError({ code: 'BAD_REQUEST', message: "Unable to process the prompt" })
+        }
+        
+        return content;
+    }
 }
-
-

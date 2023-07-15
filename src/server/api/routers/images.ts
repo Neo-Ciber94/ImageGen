@@ -116,5 +116,54 @@ export const imagesRouter = createTRPCRouter({
       }
 
       return result;
+    }),
+
+  // Improve a text prompt
+  improvePrompt: protectedProcedure
+    .use(isRateLimited)
+    .input(generateImageInputSchema)
+    .mutation(async ({ input: { prompt }, ctx }) => {
+      try {
+        const userAccount = await UserAccounts.getOrCreateUserAccount(ctx.user.id);
+
+        if (!userAccount.isUnlimited && userAccount.imageGenerationTokens <= 0) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: "You don't have enough tokens to improve prompts"
+          })
+        }
+
+        const moderation = await AI.moderateContent(prompt);
+
+        if (moderation.isFlagged) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: "The given prompt had been flagged as invalid"
+          });
+        }
+
+        const improvedPrompt = await AI.improveImagePrompt({ prompt, userId: ctx.user.id });
+
+        if (!userAccount.isUnlimited) {
+          // Decrement tokens count
+          await UserAccounts.decrementTokenCount(ctx.user.id, GENERATE_IMAGE_COUNT);
+        }
+
+        return improvedPrompt;
+      }
+      catch (err) {
+        console.error(err);
+
+        if (err instanceof TRPCError) {
+          throw err;
+        }
+
+        const message = err instanceof Error ? err.message : err?.toString() ?? "Something went wrong";
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          cause: err,
+          message
+        })
+      }
     })
 });
