@@ -240,7 +240,7 @@ function GalleryImage({
   generatingImageCount,
   onDelete,
 }: GalleryImageProps) {
-  const [visible] = useState(true);
+  const [visible] = useState(true); // TODO: Animate the exit state
 
   return (
     <AnimatePresence key={data.id}>

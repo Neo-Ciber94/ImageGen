@@ -15,6 +15,13 @@
       "when": 1688755280431,
       "tag": "0001_cuddly_nocturne",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1689472584729,
+      "tag": "0002_redundant_mantis",
+      "breakpoints": true
     }
   ]
 }

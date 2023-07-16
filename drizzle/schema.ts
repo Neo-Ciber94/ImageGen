@@ -18,5 +18,6 @@ export const generatedImages = pgTable('generatedImage', {
     userAccountId: integer('userAccountId').references(() => userAccounts.id),
     prompt: text('prompt').notNull(),
     key: text('key').notNull(),
+    blurHash: text('blurHash'),
     createdAt: timestamp('createdAt').defaultNow().notNull(),
 })

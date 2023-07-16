@@ -29,6 +29,7 @@
     "@trpc/server": "^10.26.0",
     "@upstash/ratelimit": "^0.4.3",
     "@upstash/redis": "^1.22.0",
+    "blurhash": "^2.0.5",
     "color": "^4.2.3",
     "contrast-color": "^1.0.1",
     "drizzle-orm": "^0.27.0",

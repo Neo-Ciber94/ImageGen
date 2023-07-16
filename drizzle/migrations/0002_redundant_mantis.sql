@@ -1,0 +1,1 @@
+ALTER TABLE "generatedImage" ADD COLUMN "blurHash" text;
