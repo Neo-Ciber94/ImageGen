@@ -40,7 +40,7 @@ jobs:
       - run: yarn install --frozen-lockfile
 
       # Install sharp for linux
-      - run: SHARP_IGNORE_GLOBAL_LIBVIPS=1 yarn add --arch=arm64 --platform=linux sharp
+      - run: npm rebuild --platform=linux --arch=arm64 sharp
 
       # Build app
       - run: yarn build
