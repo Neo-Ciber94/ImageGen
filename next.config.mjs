@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { env } from "./src/env.mjs";
 import nextPWA from "next-pwa";
 
@@ -19,7 +20,6 @@ const withPWA = nextPWA({
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
-  typescript: { ignoreBuildErrors: true },
 
   //output: process.env.NEXT_OUTPUT ? process.env.NEXT_OUTPUT : undefined,
   /**
@@ -51,4 +51,5 @@ const config = {
   },
 };
 
+// @ts-ignore
 export default withPWA(config);
