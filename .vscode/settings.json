@@ -9,5 +9,8 @@
         [
             "wrapperClass=\\s*?[\"'`]([^\"'`]*).*?"
         ]
+    ],
+    "cSpell.words": [
+        "blurhash"
     ]
 }

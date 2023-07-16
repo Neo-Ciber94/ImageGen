@@ -227,6 +227,7 @@ interface GalleryImageProps {
     id: number;
     url: string;
     prompt: string;
+    blurHash: string | null;
     createdAt: Date;
   };
   idx: number;

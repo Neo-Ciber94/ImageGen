@@ -5,9 +5,17 @@ import { AI } from '~/server/services/ai';
 import { FileHandler } from '~/server/services/fileHandler';
 import { GeneratedImages, UserAccounts } from '~/server/db/repositories';
 import { GENERATE_IMAGE_COUNT, MAX_PROMPT_LENGTH } from '~/common/constants';
+import * as blurhash from "blurhash";
+import sharp from 'sharp';
 
 const getImagesResultScheme = z.object({
-  images: z.array(z.object({ id: z.number(), url: z.string(), prompt: z.string(), createdAt: z.date() })),
+  images: z.array(z.object({
+    id: z.number(),
+    url: z.string(),
+    prompt: z.string(),
+    blurHash: z.string().nullable(),
+    createdAt: z.date()
+  })),
   nextCursor: z.number().nullish()
 })
 
@@ -60,7 +68,7 @@ export const imagesRouter = createTRPCRouter({
 
         const images = await AI.generateImages({ prompt, count: GENERATE_IMAGE_COUNT, userId: ctx.user.id });
         const blobs = images.map(img => img.blob);
-        const imageResult = await FileHandler.uploadFiles(blobs, {
+        const uploadResults = await FileHandler.uploadFiles(blobs, {
           metadata: {
             userId: ctx.user.id,
             prompt
@@ -68,7 +76,40 @@ export const imagesRouter = createTRPCRouter({
         });
 
         // Add generated images to the user
-        const input = imageResult.map(x => ({ key: x.key, prompt }));
+        const input: {
+          key: string;
+          prompt: string;
+          blurHash: string | undefined;
+        }[] = [];
+
+        // See: https://css-tricks.com/inline-image-previews-with-sharp-blurhash-and-lambda-functions/
+        for (const upload of uploadResults) {
+          let blurHash: string | undefined;
+
+          try {
+            const sharpImage = sharp(await upload.blob.arrayBuffer());
+            const imageMetadata = await sharpImage.metadata();
+            const buffer = await sharpImage
+              .raw()
+              .ensureAlpha()
+              .toBuffer();
+
+            const bytes = new Uint8ClampedArray(buffer);
+            const resultBlurHash = blurhash.encode(bytes, imageMetadata.width as number, imageMetadata.height as number, 4, 4);
+            const validBlurHash = blurhash.isBlurhashValid(resultBlurHash);
+            if (validBlurHash.result === true) {
+              blurHash = resultBlurHash;
+            } else {
+              console.error(validBlurHash.errorReason)
+            }
+          }
+          catch (err) {
+            console.error(err);
+          }
+
+          input.push({ key: upload.key, prompt, blurHash });
+        }
+
         await GeneratedImages.saveGeneratedImages(ctx.user.id, input)
 
         if (!userAccount.isUnlimited) {
@@ -76,7 +117,7 @@ export const imagesRouter = createTRPCRouter({
           await UserAccounts.decrementTokenCount(ctx.user.id, GENERATE_IMAGE_COUNT);
         }
 
-        return imageResult.map(url => ({ url }));
+        return uploadResults.map(url => ({ url }));
       }
       catch (err) {
         console.error(err);

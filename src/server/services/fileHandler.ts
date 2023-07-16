@@ -3,7 +3,7 @@ import { env } from "~/env.mjs";
 import { nanoid } from 'nanoid';
 
 const s3Client = new S3Client({
-    credentials: {        
+    credentials: {
         accessKeyId: env.MY_AWS_ACCESS_KEY_ID,
         secretAccessKey: env.MY_AWS_SECRET_KEY,
     },
@@ -42,7 +42,7 @@ export namespace FileHandler {
                 try {
                     const result: PutObjectCommandOutput = await s3Client.send(command);
                     console.log("File uploaded: ", result);
-                    return { key };
+                    return { key, blob };
                 }
                 catch (err) {
                     const filename = blob.name ?? "[unnamed]";
@@ -54,11 +54,11 @@ export namespace FileHandler {
             uploadFilePromises.push(uploadFile());
         }
 
-        const result = await Promise.all(uploadFilePromises);
-        const urls = result.map(({ key }) => ({ url: getImageUrl(key), key }));
+        const promiseResult = await Promise.all(uploadFilePromises);
+        const result = promiseResult.map(({ key, blob }) => ({ url: getImageUrl(key), key, blob }));
 
-        console.log(`${urls.length} files uploaded successfully`, urls);
-        return urls;
+        console.log(`${result.length} files uploaded successfully`, result);
+        return result;
     }
 
     export async function deleteFile(key: string) {

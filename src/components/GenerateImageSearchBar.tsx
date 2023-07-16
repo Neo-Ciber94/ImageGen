@@ -47,6 +47,10 @@ export default function GenerateImageSearchBar({
   }, [isMediumBreakpoint, setSearchBarState]);
 
   const handleGenerate = async () => {
+    if (generateImage.isLoading) {
+      return;
+    }
+
     setSearchBarState((p) => ({ ...p, loading: true }));
     setGeneratingImage(GENERATE_IMAGE_COUNT);
 

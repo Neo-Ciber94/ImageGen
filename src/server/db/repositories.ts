@@ -88,7 +88,7 @@ export namespace GeneratedImages {
         return { images };
     }
 
-    export async function saveGeneratedImages(userId: string, data: Pick<GeneratedImageModel, 'key' | 'prompt'>[]) {
+    export async function saveGeneratedImages(userId: string, data: InferModel<typeof generatedImages, 'insert'>[]) {
         const userAccount = await UserAccounts.getOrCreateUserAccount(userId);
 
         const input = data.map(x => ({ ...x, userAccountId: userAccount.id }));

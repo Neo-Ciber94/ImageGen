@@ -11,10 +11,12 @@ import { Dialog } from "@headlessui/react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 import { useLimitedToaster } from "~/hooks/useLimitedToaster";
+import { GENERATED_IMAGE_SIZE } from "~/common/constants";
+import { useBase64BlurHash } from "~/hooks/useBase64BlurHash";
 
 type GeneratedImageType = Pick<
   GeneratedImageModel,
-  "id" | "prompt" | "createdAt"
+  "id" | "prompt" | "createdAt" | "blurHash"
 > & { url: string };
 
 export interface GeneratedImageProps {
@@ -67,6 +69,12 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
     };
   }, [img.id, open]);
 
+  const imgBlurHash = useBase64BlurHash({
+    blurHash: img.blurHash,
+    width: GENERATED_IMAGE_SIZE,
+    height: GENERATED_IMAGE_SIZE,
+  });
+
   return (
     <>
       <div className="relative">
@@ -82,6 +90,12 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
             src={img.url}
             width={512}
             height={512}
+            // placeholder={imgBlurHash == null ? "empty" : "blur"}
+            // blurDataURL={
+            //   imgBlurHash == null
+            //     ? undefined
+            //     : `data:image/png;base64,${imgBlurHash}`
+            // }
             onLoad={(e) => {
               const img = e.currentTarget;
               setDisplayColors(getImageDisplayColors(img));
@@ -96,6 +110,7 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
           prompt={img.prompt}
           onDelete={onDelete}
           onClose={handleClose}
+          blurHash={img.blurHash}
           displayColors={
             displayColors ?? { bgColor: "black", fgColor: "white" }
           }
@@ -108,6 +123,7 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
 interface PreviewImageProps {
   url: string;
   prompt: string;
+  blurHash: string | null;
   displayColors: ImageDisplayColor;
   onClose: () => void;
   onDelete: () => Promise<void>;
@@ -119,9 +135,16 @@ function PreviewImage({
   onClose,
   onDelete,
   displayColors,
+  blurHash,
 }: PreviewImageProps) {
   useLimitedToaster({ id: "clipboard", max: 1 });
   const [isOpen, setIsOpen] = useState(true);
+
+  const imgBlurHash = useBase64BlurHash({
+    blurHash: blurHash,
+    width: GENERATED_IMAGE_SIZE,
+    height: GENERATED_IMAGE_SIZE,
+  });
 
   const handleClose = () => {
     onClose();
@@ -182,6 +205,12 @@ function PreviewImage({
                 alt={prompt}
                 src={url}
                 onClick={(e) => e.stopPropagation()}
+                placeholder={imgBlurHash == null ? "empty" : "blur"}
+                blurDataURL={
+                  imgBlurHash == null
+                    ? undefined
+                    : `data:image/png;base64,${imgBlurHash}`
+                }
               />
 
               <p
