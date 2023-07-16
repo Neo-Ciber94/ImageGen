@@ -13,7 +13,7 @@ import { useDebounce } from "~/hooks/useDebounce";
 import { AnimatePresence, motion } from "framer-motion";
 import { AnimatedPage } from "~/components/AnimatedPage";
 import { getTRPCValidationError } from "~/utils/getTRPCValidationError";
-import { Fragment, useEffect, useMemo } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { MdOutlineHideImage } from "react-icons/md";
 import { FallingLines } from "react-loader-spinner";
@@ -76,7 +76,7 @@ export default function GalleryPage() {
     const shouldDelete = confirm("Do you want to delete this image?");
 
     if (!shouldDelete) {
-      return;
+      return false;
     }
 
     const toastPromise = deferred<void>();
@@ -91,15 +91,18 @@ export default function GalleryPage() {
       await deleteImage.mutateAsync({ id });
       await apiContext.images.getAll.invalidate();
       toastPromise.resolve();
+      return true;
     } catch (err) {
       console.error(err);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const trpcError = getTRPCValidationError(err);
       if (trpcError) {
-        return toastPromise.reject(trpcError);
+        toastPromise.reject(trpcError);
+        return false;
       }
 
       toastPromise.reject(err);
+      return false;
     }
   };
 
@@ -173,27 +176,13 @@ export default function GalleryPage() {
                   <Fragment key={pageIdx}>
                     {page.images.map((data, idx) => {
                       return (
-                        <AnimatePresence key={data.id}>
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{
-                              type: "sprint",
-                              duration: 0.25,
-                              delay: 0.08 * idx,
-                            }}
-                            className={`relative mb-auto ${
-                              (idx + generatingImageCount) % 3 === 0
-                                ? "col-span-2 row-span-2"
-                                : ""
-                            }`}
-                          >
-                            <GeneratedImage
-                              img={data}
-                              onDelete={() => handleDelete(data.id)}
-                            />
-                          </motion.div>
-                        </AnimatePresence>
+                        <GalleryImage
+                          key={data.id}
+                          data={data}
+                          idx={idx}
+                          generatingImageCount={generatingImageCount}
+                          onDelete={() => handleDelete(data.id)}
+                        />
                       );
                     })}
                   </Fragment>
@@ -230,6 +219,56 @@ export default function GalleryPage() {
           </div>
         )}
     </>
+  );
+}
+
+interface GalleryImageProps {
+  data: {
+    id: number;
+    url: string;
+    prompt: string;
+    createdAt: Date;
+  };
+  idx: number;
+  generatingImageCount: number;
+  onDelete: () => Promise<boolean>;
+}
+
+function GalleryImage({
+  data,
+  idx,
+  generatingImageCount,
+  onDelete,
+}: GalleryImageProps) {
+  const [visible] = useState(true);
+
+  return (
+    <AnimatePresence key={data.id}>
+      {visible && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0 }}
+          transition={{
+            type: "sprint",
+            duration: 0.25,
+            delay: 0.08 * idx,
+          }}
+          className={`relative mb-auto ${
+            (idx + generatingImageCount) % 3 === 0
+              ? "col-span-2 row-span-2"
+              : ""
+          }`}
+        >
+          <GeneratedImage
+            img={data}
+            onDelete={async () => {
+              await onDelete();
+            }}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
