@@ -39,6 +39,9 @@ jobs:
       # Install packages
       - run: yarn install --frozen-lockfile
 
+      # Install sharp for linux
+      - run: SHARP_IGNORE_GLOBAL_LIBVIPS=1 yarn add --arch=x64 --platform=linux sharp
+
       # Build app
       - run: yarn build
 
