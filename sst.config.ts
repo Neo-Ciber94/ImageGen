@@ -12,6 +12,7 @@ export default {
   stacks(app) {
     app.stack(function Site({ stack }) {
       const site = new NextjsSite(stack, "ImageGenSite", {
+        timeout: '1 minute',
         environment: {
           ...env
         },
@@ -24,7 +25,6 @@ export default {
 
     app.setDefaultFunctionProps({
       logRetention: 'one_week',
-      timeout: '1 minute'
     })
   },
 } satisfies SSTConfig;
