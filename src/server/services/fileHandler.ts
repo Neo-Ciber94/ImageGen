@@ -16,7 +16,7 @@ export interface UploadFilesOptions {
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace FileHandler {
     export async function uploadFiles(contentToUpload: Blob[], opts: UploadFilesOptions = {}) {
-        const uploadFilePromises: Promise<{ key: string }>[] = [];
+        const uploadFilePromises: Promise<{ key: string, blob: Blob }>[] = [];
 
         for (const blob of contentToUpload) {
             const uploadFile = async () => {

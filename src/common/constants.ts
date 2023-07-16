@@ -12,7 +12,7 @@ export const GENERATED_IMAGE_SIZE = 512;
 /**
  * The size of the image to generate.
  */
-export const GENERATE_IMAGE_SIZE = `${GENERATED_IMAGE_SIZE}x${GENERATED_IMAGE_SIZE}`;
+export const GENERATE_IMAGE_SIZE = `${GENERATED_IMAGE_SIZE}x${GENERATED_IMAGE_SIZE}` as const;
 
 /**
  * Max length of the prompt. at the given date the max length is 1000 words.
