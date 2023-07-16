@@ -89,6 +89,8 @@ export namespace AI {
     }
 
     export async function improveImagePrompt({ prompt, userId }: { prompt: string, userId: string }) {
+        console.log(`Prompt to update: ${prompt}`);
+
         const ERROR_MESSAGE = "[INVALID PROMPT]";
         const response = await openAi.createChatCompletion({
             model: 'gpt-3.5-turbo',
@@ -97,9 +99,9 @@ export namespace AI {
             messages: [
                 {
                     role: 'system',
-                    content: `You are an assistant that improve image generation prompts, for each
-                    prompt you return a improved and more detailed version and not other details but if the prompt makes no
-                    sense to proccess just return: ${ERROR_MESSAGE}.`
+                    content: `You are an assistant that improve image generation prompts, for a given
+                    prompt you MUST return a more detailed version with more details if not specified but if the prompt is not a valid
+                    word or phrase return the text: "${ERROR_MESSAGE}".`
                 },
                 {
                     role: 'assistant',
@@ -112,14 +114,16 @@ export namespace AI {
         const choice = data.choices[0];
         const content = choice?.message?.content;
 
+        console.log(`Updated prompt content: '${content ?? ""}'`);
+
         if (content == null) {
             throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: "Invalid OpenAI response" });
         }
 
-        if (content.trim() === ERROR_MESSAGE) {
-            throw new TRPCError({ code: 'BAD_REQUEST', message: "Unable to process the prompt" })
+        if (content.includes(ERROR_MESSAGE)) {
+            throw new TRPCError({ code: 'BAD_REQUEST', message: "No enough context to improve the prompt" })
         }
-        
+
         return content;
     }
 }
