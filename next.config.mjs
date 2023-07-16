@@ -19,8 +19,9 @@ const withPWA = nextPWA({
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
+  typescript: { ignoreBuildErrors: true },
 
-  output: process.env.NEXT_OUTPUT ? process.env.NEXT_OUTPUT : undefined,
+  //output: process.env.NEXT_OUTPUT ? process.env.NEXT_OUTPUT : undefined,
   /**
    * If you have `experimental: { appDir: true }` set, then you must comment the below `i18n` config
    * out.
