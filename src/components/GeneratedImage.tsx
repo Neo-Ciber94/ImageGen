@@ -90,12 +90,12 @@ export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
             src={img.url}
             width={512}
             height={512}
-            // placeholder={imgBlurHash == null ? "empty" : "blur"}
-            // blurDataURL={
-            //   imgBlurHash == null
-            //     ? undefined
-            //     : `data:image/png;base64,${imgBlurHash}`
-            // }
+            placeholder={imgBlurHash == null ? "empty" : "blur"}
+            blurDataURL={
+              imgBlurHash == null
+                ? undefined
+                : `data:image/png;base64,${imgBlurHash}`
+            }
             onLoad={(e) => {
               const img = e.currentTarget;
               setDisplayColors(getImageDisplayColors(img));
