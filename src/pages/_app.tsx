@@ -5,7 +5,6 @@ import Layout from "~/layout/Layout";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "react-hot-toast";
 import { NextSeo } from "next-seo";
-import { DarkModeProvider } from "~/hooks/useDarkMode";
 
 // This should be more dynamic
 const SITE_URL = "https://du8ecttu3enax.cloudfront.net";
@@ -50,12 +49,10 @@ const MyApp: AppType = ({ Component, pageProps }) => {
       />
 
       <ClerkProvider {...pageProps}>
-        <DarkModeProvider>
           <Layout>
             <Component {...pageProps} />
           </Layout>
           <Toaster />
-        </DarkModeProvider>
       </ClerkProvider>
     </>
   );

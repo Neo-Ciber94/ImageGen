@@ -8,8 +8,9 @@ import {
   getImageDisplayColors,
 } from "~/utils/getImageDisplayColors";
 import { Dialog } from "@headlessui/react";
-import toast, { useToasterStore } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useRouter } from "next/router";
+import { useLimitedToaster } from "~/hooks/useLimitedToaster";
 
 type GeneratedImageType = Pick<
   GeneratedImageModel,
@@ -19,16 +20,6 @@ type GeneratedImageType = Pick<
 export interface GeneratedImageProps {
   img: GeneratedImageType;
   onDelete: () => Promise<void>;
-}
-
-function getImageUrlHashId() {
-  const matches = /img-(\d+)/.exec(window.location.hash);
-  if (matches == null) {
-    return null;
-  }
-
-  const id = Number(matches[1]);
-  return Number.isNaN(id) ? null : id;
 }
 
 export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
@@ -129,7 +120,7 @@ function PreviewImage({
   onDelete,
   displayColors,
 }: PreviewImageProps) {
-  useLimitedToast(1, "clipboard");
+  useLimitedToaster({ id: "clipboard", max: 1 });
   const [isOpen, setIsOpen] = useState(true);
 
   const handleClose = () => {
@@ -228,27 +219,12 @@ function PreviewImage({
   );
 }
 
-const useLimitedToast = (max: number, id: string) => {
-  const { toasts } = useToasterStore();
+function getImageUrlHashId() {
+  const matches = /img-(\d+)/.exec(window.location.hash);
+  if (matches == null) {
+    return null;
+  }
 
-  const [toastLimit, setToastLimit] = useState<number>(max);
-
-  useEffect(() => {
-    toasts
-      .filter((tt) => tt.visible && tt.id === id)
-      .filter((_, i) => i >= toastLimit)
-      .forEach((tt) => toast.dismiss(tt.id));
-  }, [id, toastLimit, toasts]);
-
-  const toast$ = {
-    ...toast,
-    id,
-    setLimit: (l: number) => {
-      if (l !== toastLimit) {
-        setToastLimit(l);
-      }
-    },
-  };
-
-  return { toast: toast$ };
-};
+  const id = Number(matches[1]);
+  return Number.isNaN(id) ? null : id;
+}
