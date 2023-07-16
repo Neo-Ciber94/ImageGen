@@ -9,6 +9,7 @@ import {
 } from "~/utils/getImageDisplayColors";
 import { Dialog } from "@headlessui/react";
 import toast, { useToasterStore } from "react-hot-toast";
+import { useRouter } from "next/router";
 
 type GeneratedImageType = Pick<
   GeneratedImageModel,
@@ -20,17 +21,60 @@ export interface GeneratedImageProps {
   onDelete: () => Promise<void>;
 }
 
+function getImageUrlHashId() {
+  const matches = /img-(\d+)/.exec(window.location.hash);
+  if (matches == null) {
+    return null;
+  }
+
+  const id = Number(matches[1]);
+  return Number.isNaN(id) ? null : id;
+}
+
 export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [displayColors, setDisplayColors] = useState<ImageDisplayColor>();
 
   const handleOpen = () => {
-    setOpen(true);
-  }
+    // We assign the id of the image to the url which is later to open the modal for that image
+    window.location.hash = `img-${img.id}`;
+  };
 
   const handleClose = () => {
-    setOpen(false);
-  }
+    // For close we check if there is an image id, in that case we just go back,
+    // otherwise we try to close the modal anyway
+    if (getImageUrlHashId() != null && open) {
+      router.back();
+    } else {
+      setOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    // We control when an image is showing using the URL,
+    // this way on mobile devices the back button can be used to close the modal
+    // and not only the close button.
+    const handleHashChange = () => {
+      const imgId = getImageUrlHashId();
+
+      if (imgId === img.id) {
+        setOpen(true);
+        return;
+      }
+
+      // Not matches, attempt to close it if possible
+      if (open) {
+        setOpen(false);
+      }
+    };
+
+    handleHashChange();
+    window.addEventListener("hashchange", handleHashChange);
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, [img.id, open]);
 
   return (
     <>
