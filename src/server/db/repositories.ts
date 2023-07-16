@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 import { type InferModel, eq, and, sql, desc } from "drizzle-orm";
 import { db } from "./drizzle";
 import { generatedImages, userAccounts } from "drizzle/schema";
 import { clerkClient } from "@clerk/nextjs";
+import dayjs from 'dayjs';
+import { TOKEN_REGENERATION_COUNT, TOKEN_REGENERATION_DAYS } from "~/common/constants";
 
 export const DEFAULT_USER_TOKEN_COUNT = 20;
 
 export type GeneratedImageModel = InferModel<typeof generatedImages>;
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace UserAccounts {
     export async function getOrCreateUserAccount(userId: string) {
         const userAccountResults = await db.select()
@@ -43,9 +45,45 @@ export namespace UserAccounts {
             .set({ imageGenerationTokens: result.imageGenerationTokens - count })
             .where(eq(userAccounts.userId, userId));
     }
+
+    export async function checkTokenRegeneration(userId: string) {
+        const userAccount = await getOrCreateUserAccount(userId);
+
+        // If the account is unlimited we don't need to regenerate tokens
+        if (userAccount.isUnlimited) {
+            return null;
+        }
+
+        if (userAccount.nextTokenRegeneration == null) {
+            const nextTokenRegenerationDate = dayjs().add(TOKEN_REGENERATION_DAYS, 'days');
+            await db.update(userAccounts).set({
+                nextTokenRegeneration: nextTokenRegenerationDate.toISOString()
+            });
+
+            return nextTokenRegenerationDate.toDate();
+        }
+
+        const now = dayjs();
+        const next = dayjs(userAccount.nextTokenRegeneration);
+
+        // If we reach the date of regeneration, we give the users tokens up to the max regeneration count,
+        // we don't add tokens account passing over the regeneration.
+        if (next.isSame(now, 'day') || next.isAfter(now)) {
+            const canUpdateTokens = userAccount.imageGenerationTokens < TOKEN_REGENERATION_COUNT;
+            const nextTokenRegenerationDate = dayjs().add(TOKEN_REGENERATION_DAYS, 'days');
+            await db.update(userAccounts).set({
+                nextTokenRegeneration: nextTokenRegenerationDate.toISOString(),
+                imageGenerationTokens: canUpdateTokens ? TOKEN_REGENERATION_COUNT : undefined
+            });
+
+            return nextTokenRegenerationDate.toDate();
+        }
+
+        return dayjs(userAccount.nextTokenRegeneration).toDate();
+    }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
+
 export namespace GeneratedImages {
     export interface GetAllImagesOptions {
         search?: string | null,

@@ -1,0 +1,137 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "id": "8d7d8c36-a818-4063-bf75-9f1f6825947f",
+  "prevId": "bd01df35-e76f-4f56-9f50-13da6f166b18",
+  "tables": {
+    "generatedImage": {
+      "name": "generatedImage",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userAccountId": {
+          "name": "userAccountId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prompt": {
+          "name": "prompt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "blurHash": {
+          "name": "blurHash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "generatedImage_userAccountId_userAccount_id_fk": {
+          "name": "generatedImage_userAccountId_userAccount_id_fk",
+          "tableFrom": "generatedImage",
+          "tableTo": "userAccount",
+          "columnsFrom": [
+            "userAccountId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {}
+    },
+    "userAccount": {
+      "name": "userAccount",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "userName": {
+          "name": "userName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "imageGenerationTokens": {
+          "name": "imageGenerationTokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "nextTokenRegeneration": {
+          "name": "nextTokenRegeneration",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isUnlimited": {
+          "name": "isUnlimited",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "userIdIndex": {
+          "name": "userIdIndex",
+          "columns": [
+            "userId"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {}
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  }
+}

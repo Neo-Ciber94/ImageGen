@@ -19,3 +19,14 @@ export const GENERATE_IMAGE_SIZE = `${GENERATED_IMAGE_SIZE}x${GENERATED_IMAGE_SI
  * @see https://platform.openai.com/docs/api-reference/images
  */
 export const MAX_PROMPT_LENGTH = 800;
+
+/**
+ * Days to wait before regenerate the tokens.
+ */
+export const TOKEN_REGENERATION_DAYS = 30;
+
+
+/**
+ * The max number of tokens to regenerate.
+ */
+export const TOKEN_REGENERATION_COUNT = 10;

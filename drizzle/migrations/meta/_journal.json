@@ -22,6 +22,13 @@
       "when": 1689472584729,
       "tag": "0002_redundant_mantis",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1689484299459,
+      "tag": "0003_wakeful_dazzler",
+      "breakpoints": true
     }
   ]
 }

@@ -1,10 +1,11 @@
-import { pgTable, integer, serial, text, uniqueIndex, boolean, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, integer, serial, text, uniqueIndex, boolean, timestamp, date } from 'drizzle-orm/pg-core';
 
 export const userAccounts = pgTable('userAccount', {
     id: serial('id').primaryKey(),
     userId: text('userId').notNull(),
     userName: text('userName'),
     imageGenerationTokens: integer('imageGenerationTokens').notNull().default(0),
+    nextTokenRegeneration: date('nextTokenRegeneration'),
     isUnlimited: boolean('isUnlimited').notNull().default(false),
     createdAt: timestamp('createdAt').defaultNow().notNull(),
 }, userAccount => {
