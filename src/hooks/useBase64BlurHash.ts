@@ -2,7 +2,6 @@ import * as blurhash from "blurhash";
 import { useMemo } from "react";
 import blurHashToDataURL from "~/utils/blurHashToDataURL";
 
-
 export interface UseBase64BlurHashOptions {
     blurHash: string | null | undefined;
     width: number;
