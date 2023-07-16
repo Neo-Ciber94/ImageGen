@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import { Menu } from "@headlessui/react";
 import { MdOutlineGeneratingTokens } from "react-icons/md";
 import { api } from "~/utils/api";
+import { AnimatePresence, motion } from "framer-motion";
 
 const font = Lato({
   weight: ["700"],
@@ -73,46 +74,59 @@ function UserAvatar({ user }: UserAvatarProps) {
 
   return (
     <Menu>
-      <Menu.Button>
-        <div className="overflow-hidden rounded-full shadow">
-          <ImageWithFallback
-            alt={name}
-            src={user.imageUrl}
-            quality={100}
-            fallbackSrc={fallbackImg}
-            width={30}
-            height={30}
-          />
-        </div>
-      </Menu.Button>
-      <Menu.Items
-        as="ul"
-        className="absolute right-14 top-14 z-40 flex flex-col gap-2 overflow-hidden rounded-lg border border-gray-200 
-        bg-white p-1 shadow-md dark:border-violet-900/50 dark:bg-slate-900 dark:shadow-sm dark:shadow-violet-400/10"
-      >
-        <Menu.Item
-          as="li"
-          className="flex cursor-pointer flex-row items-center gap-4 rounded-lg px-5 py-2 hover:bg-violet-500 hover:text-white"
-        >
-          <MdOutlineGeneratingTokens className="text-2xl" />
-          {tokenCountQuery.isLoading && (
-            <div className="px-10">
-              <LoadingIndicator size={30} />
+      {({ open }) => (
+        <>
+          <Menu.Button>
+            <div className="overflow-hidden rounded-full shadow">
+              <ImageWithFallback
+                alt={name}
+                src={user.imageUrl}
+                quality={100}
+                fallbackSrc={fallbackImg}
+                width={30}
+                height={30}
+              />
             </div>
-          )}
-          <span className="font-medium">
-            {tokenCountQuery.data != null && (
-              <>
-                {tokenCountQuery.data === "unlimited"
-                  ? "Unlimited tokens"
-                  : `${tokenCountQuery.data} ${
-                      tokenCountQuery.data === 1 ? "token" : "tokens"
-                    } left`}
-              </>
+          </Menu.Button>
+
+          <AnimatePresence>
+            {open && (
+              <Menu.Items
+                static
+                as={motion.ul}
+                initial={{ opacity: 0, translateX: -60 }}
+                animate={{ opacity: 1, translateX: 0 }}
+                exit={{ opacity: 0, translateX: -60 }}
+                className="absolute right-14 top-14 z-40 flex flex-col gap-2 overflow-hidden rounded-lg border border-gray-200 
+        bg-white p-1 shadow-md dark:border-violet-900/50 dark:bg-slate-900 dark:shadow-sm dark:shadow-violet-400/10"
+              >
+                <Menu.Item
+                  as="li"
+                  className="flex cursor-pointer flex-row items-center gap-4 rounded-lg px-5 py-2 hover:bg-violet-500 hover:text-white"
+                >
+                  <MdOutlineGeneratingTokens className="text-2xl" />
+                  {tokenCountQuery.isLoading && (
+                    <div className="px-10">
+                      <LoadingIndicator size={25} />
+                    </div>
+                  )}
+                  <span className="font-medium">
+                    {tokenCountQuery.data != null && (
+                      <>
+                        {tokenCountQuery.data === "unlimited"
+                          ? "Unlimited tokens"
+                          : `${tokenCountQuery.data} ${
+                              tokenCountQuery.data === 1 ? "token" : "tokens"
+                            } left`}
+                      </>
+                    )}
+                  </span>
+                </Menu.Item>
+              </Menu.Items>
             )}
-          </span>
-        </Menu.Item>
-      </Menu.Items>
+          </AnimatePresence>
+        </>
+      )}
     </Menu>
   );
 }
