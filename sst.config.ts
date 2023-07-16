@@ -23,7 +23,8 @@ export default {
     });
 
     app.setDefaultFunctionProps({
-      logRetention: 'one_week'
+      logRetention: 'one_week',
+      timeout: '1 minute'
     })
   },
 } satisfies SSTConfig;
