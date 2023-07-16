@@ -2,11 +2,9 @@
 
 [![CI](https://github.com/Neo-Ciber94/ImageGen/actions/workflows/ci.yml/badge.svg)](https://github.com/Neo-Ciber94/ImageGen/actions/workflows/ci.yml)
 
-
 An AI image generator gallery.
 
 > Website: <https://du8ecttu3enax.cloudfront.net/>
-
 
 ## Features
 
@@ -17,7 +15,7 @@ An AI image generator gallery.
 - [x] Dark Mode
 - [x] Rate limiting
 - [x] Auth
-  - [x] Google
+  - [x] Google\*
   - [ ] Github
   - [ ] Discord
 - [x] Images saved to S3 and distributed thought Cloudfront
@@ -28,11 +26,13 @@ An AI image generator gallery.
 - [ ] Token regeneration System
   - Each X days the user recover tokens
 
+> \* <small>We are only using google auth for now to prevent multiple accounts from different sources to spam image generation, having only 1 source reduce the possibility of this happening</small>
+
 ## Stack
 
 - NextJS
 - T3 Stack (TRPC, Typescript, TailwindCSS)
-- Drizzle ORM *(With PostgreSQL)*
+- Drizzle ORM _(With PostgreSQL)_
 - HeadlessUI
 - Clerk
 - OpenAI
@@ -46,4 +46,4 @@ The deployment is done using `SST` which involve using AWS.
 
 ![Gallery](./public/screenshots/gallery_dark.png)
 
-------------------------
+---
