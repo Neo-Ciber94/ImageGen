@@ -1,4 +1,5 @@
 import * as blurhash from "blurhash";
+import { useMemo } from "react";
 import blurHashToDataURL from "~/utils/blurHashToDataURL";
 
 
@@ -10,13 +11,17 @@ export interface UseBase64BlurHashOptions {
 }
 
 export function useBase64BlurHash({ blurHash, width, height, punch }: UseBase64BlurHashOptions) {
-    if (blurHash == null) {
-        return null;
-    }
+    const result = useMemo(() => {
+        if (blurHash == null) {
+            return null;
+        }
 
-    if (blurhash.isBlurhashValid(blurHash).result === false) {
-        return null;
-    }
+        if (blurhash.isBlurhashValid(blurHash).result === false) {
+            return null;
+        }
 
-    return blurHashToDataURL(blurHash, width, height, punch);
+        return blurHashToDataURL(blurHash, width, height, punch);
+    }, [blurHash, width, height, punch]);
+
+    return result;
 }

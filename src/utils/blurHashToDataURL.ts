@@ -2,7 +2,6 @@
 import { decode } from "blurhash"
 
 export default function blurHashToDataURL(hash: string, width: number, height: number, punch?: number): string {
-
     const pixels = decode(hash, width, height, punch)
     const dataURL = parsePixels(pixels, width, height)
     return dataURL
