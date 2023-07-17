@@ -17,7 +17,7 @@ export default function Footer() {
       </div>
 
       <a href="https://github.com/Neo-Ciber94/ImageGen" target="_blank">
-        <BiLogoGithub className="text-lg text-white" />
+        <BiLogoGithub className="text-lg dark:text-white text-violet-700" />
       </a>
     </footer>
   );
