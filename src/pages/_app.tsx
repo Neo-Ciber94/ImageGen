@@ -4,7 +4,7 @@ import { api } from "~/utils/api";
 import Layout from "~/layout/Layout";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "react-hot-toast";
-import { NextSeo } from "next-seo";
+import { DefaultSeo } from "next-seo";
 
 // This should be more dynamic
 const SITE_URL = "https://du8ecttu3enax.cloudfront.net";
@@ -12,7 +12,7 @@ const SITE_URL = "https://du8ecttu3enax.cloudfront.net";
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <>
-      <NextSeo
+      <DefaultSeo
         defaultTitle="ImageGen"
         titleTemplate="ImageGen | %s"
         description="An AI image generator gallery"
@@ -49,10 +49,10 @@ const MyApp: AppType = ({ Component, pageProps }) => {
       />
 
       <ClerkProvider {...pageProps}>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-          <Toaster />
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+        <Toaster />
       </ClerkProvider>
     </>
   );
