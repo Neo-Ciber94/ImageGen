@@ -65,6 +65,16 @@ export default function GalleryPage() {
   }, [data?.pages]);
 
   useEffect(() => {
+    if (history.scrollRestoration) {
+      history.scrollRestoration = "manual";
+    }
+
+    return () => {
+      history.scrollRestoration = "auto";
+    };
+  }, []);
+
+  useEffect(() => {
     if (inView && hasNextPage) {
       void fetchNextPage();
     }

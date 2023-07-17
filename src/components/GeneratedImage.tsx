@@ -19,6 +19,7 @@ import { useLimitedToaster } from "~/hooks/useLimitedToaster";
 import { GENERATED_IMAGE_SIZE } from "~/common/constants";
 import { useBase64BlurHash } from "~/hooks/useBase64BlurHash";
 import { withLongPress } from "./withLongPress";
+// import { useScrollRestoration } from "~/hooks/useScrollRestoration";
 
 type GeneratedImageType = Pick<
   GeneratedImageModel,
@@ -32,7 +33,6 @@ export interface GeneratedImageProps {
 
 export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
   const router = useRouter();
-
   const [open, setOpen] = useState(false);
   const [displayColors, setDisplayColors] = useState<ImageDisplayColor>();
 
