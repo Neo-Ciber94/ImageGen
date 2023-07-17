@@ -100,7 +100,8 @@ export namespace AI {
                 {
                     role: 'system',
                     content: `You are an assistant that improve image generation prompts, for a given
-                    prompt you MUST return a more detailed version with more details if not specified but if the prompt is not a valid
+                    prompt you MUST return a more detailed version in a single paragraph
+                    of text with more details if not specified but if the prompt is not a valid
                     word or phrase return the text: "${ERROR_MESSAGE}".`
                 },
                 {
