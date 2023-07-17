@@ -1,4 +1,4 @@
-import { SignOutButton, useUser } from "@clerk/nextjs";
+import { SignOutButton, useAuth, useUser } from "@clerk/nextjs";
 import { type UserResource } from "@clerk/types";
 import { Lato } from "next/font/google";
 import Link from "next/link";
@@ -71,6 +71,7 @@ interface UserAvatarProps {
 function UserAvatar({ user }: UserAvatarProps) {
   const name = user.username || user.firstName || "User";
   const router = useRouter();
+  const { signOut } = useAuth();
   const [showCount, setShowCount] = useState(false);
   const { isSignedIn } = useUser();
   const fallbackImg = useMemo(
@@ -163,13 +164,15 @@ function UserAvatar({ user }: UserAvatarProps) {
                       <Menu.Item
                         as="li"
                         className="flex cursor-pointer flex-row items-center gap-2 rounded-lg px-5 py-2 hover:bg-violet-500 hover:text-white sm:hidden"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          void signOut(async () => {
+                            await router.push("/");
+                          });
+                        }}
                       >
                         <TbLogout2 className="text-xl" />
-                        <SignOutButton signOutCallback={() => router.push("/")}>
-                          <button className="group relative flex flex-col gap-4 font-bold hover:text-purple-800">
-                            Sign Out
-                          </button>
-                        </SignOutButton>
+                        <span>Sign Out</span>
                       </Menu.Item>
                     )}
                   </>
