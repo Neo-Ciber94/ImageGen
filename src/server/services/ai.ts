@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { Configuration, OpenAIApi } from "openai";
-import { GENERATE_IMAGE_SIZE } from "~/common/constants";
+import { GENERATE_IMAGE_SIZE, MAX_PROMPT_LENGTH } from "~/common/constants";
 import { env } from '~/env.mjs';
 
 const configuration = new Configuration({
@@ -98,9 +98,10 @@ export namespace AI {
             temperature: 1.6,
             messages: [
                 {
+                    // We seed the max characters but currently the AI may not be able to infer that
                     role: 'system',
                     content: `You are an assistant that improve image generation prompts, for a given
-                    prompt you MUST return a more detailed version in a single paragraph
+                    prompt you MUST return a more detailed version in a single paragraph with less than ${MAX_PROMPT_LENGTH} characters
                     of text with more details if not specified but if the prompt is not a valid
                     word or phrase return the text: "${ERROR_MESSAGE}".`
                 },
