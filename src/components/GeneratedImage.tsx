@@ -256,12 +256,15 @@ hover:max-h-[400px] hover:whitespace-normal active:scale-95 active:brightness-75
       onLongPress={() => {
         navigator.clipboard
           .writeText(prompt)
-          .then(() =>
+          .then(() => {
             toast.success("Copied to clipboard", {
               id: "clipboard",
               icon: "✏️",
-            })
-          )
+            });
+
+            // Feedback
+            navigator.vibrate(200);
+          })
           .catch(console.error);
       }}
       style={{
