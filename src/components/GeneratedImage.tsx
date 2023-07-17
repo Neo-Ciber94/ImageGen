@@ -1,5 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { DetailedHTMLProps, HTMLAttributes, useEffect, useState } from "react";
+import {
+  type DetailedHTMLProps,
+  type HTMLAttributes,
+  useEffect,
+  useState,
+} from "react";
 import { MdDelete } from "react-icons/md";
 import { type GeneratedImageModel } from "~/server/db/repositories";
 import ImageWithFallback from "./ImageWithFallback";
