@@ -11,6 +11,7 @@ import ImageWithFallback from "~/components/ImageWithFallback";
 import { useMemo, useState } from "react";
 import { Menu } from "@headlessui/react";
 import { MdOutlineGeneratingTokens, MdCalendarToday } from "react-icons/md";
+import { TbLogout2 } from "react-icons/tb";
 import { api } from "~/utils/api";
 import { AnimatePresence, motion } from "framer-motion";
 import dayjs from "dayjs";
@@ -48,7 +49,7 @@ export default function Header() {
       <div className="flex flex-row items-center gap-2">
         {user && isSignedIn && (
           <SignOutButton signOutCallback={() => router.push("/")}>
-            <button className="group relative flex flex-col gap-4 font-bold hover:text-purple-800">
+            <button className="group relative mr-5 hidden flex-col gap-4 font-bold hover:text-purple-800 sm:flex">
               <span>Sign Out</span>
               <div className="absolute -bottom-1 mx-auto h-[2px] w-full origin-center scale-x-0 bg-purple-600 transition-all duration-200 group-hover:scale-x-100"></div>
             </button>
@@ -69,7 +70,9 @@ interface UserAvatarProps {
 
 function UserAvatar({ user }: UserAvatarProps) {
   const name = user.username || user.firstName || "User";
+  const router = useRouter();
   const [showCount, setShowCount] = useState(false);
+  const { isSignedIn } = useUser();
   const fallbackImg = useMemo(
     () => `https://placehold.co/64x64/9333ea/FFF?text=${name.slice(0, 2)}`,
     [name]
@@ -155,6 +158,20 @@ function UserAvatar({ user }: UserAvatarProps) {
                           </span>
                         </Menu.Item>
                       )}
+
+                    {isSignedIn && (
+                      <Menu.Item
+                        as="li"
+                        className="flex cursor-pointer flex-row items-center gap-2 rounded-lg px-5 py-2 hover:bg-violet-500 hover:text-white sm:hidden"
+                      >
+                        <TbLogout2 className="text-xl" />
+                        <SignOutButton signOutCallback={() => router.push("/")}>
+                          <button className="group relative flex flex-col gap-4 font-bold hover:text-purple-800">
+                            Sign Out
+                          </button>
+                        </SignOutButton>
+                      </Menu.Item>
+                    )}
                   </>
                 )}
               </Menu.Items>
