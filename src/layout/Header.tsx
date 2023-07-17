@@ -70,7 +70,7 @@ function UserAvatar({ user }: UserAvatarProps) {
     [name]
   );
 
-  const tokenCountQuery = api.users.getTokenCount.useQuery();
+  const userTokensQuery = api.users.getTokenCount.useQuery();
 
   return (
     <Menu>
@@ -105,18 +105,20 @@ function UserAvatar({ user }: UserAvatarProps) {
                   className="flex cursor-pointer flex-row items-center gap-4 rounded-lg px-5 py-2 hover:bg-violet-500 hover:text-white"
                 >
                   <MdOutlineGeneratingTokens className="text-2xl" />
-                  {tokenCountQuery.isLoading && (
+                  {userTokensQuery.isLoading && (
                     <div className="px-10">
                       <LoadingIndicator size={25} />
                     </div>
                   )}
                   <span className="font-medium">
-                    {tokenCountQuery.data != null && (
+                    {userTokensQuery.data != null && (
                       <>
-                        {tokenCountQuery.data === "unlimited"
+                        {userTokensQuery.data.tokenCount === "unlimited"
                           ? "Unlimited tokens"
-                          : `${tokenCountQuery.data} ${
-                              tokenCountQuery.data === 1 ? "token" : "tokens"
+                          : `${userTokensQuery.data.tokenCount} ${
+                              userTokensQuery.data.tokenCount === 1
+                                ? "token"
+                                : "tokens"
                             } left`}
                       </>
                     )}

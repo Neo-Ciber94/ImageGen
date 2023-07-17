@@ -5,6 +5,12 @@ export const userRouter = createTRPCRouter({
     getTokenCount: protectedProcedure.query(async ({ ctx }) => {
         const userId = ctx.user.id;
         const userAccount = await UserAccounts.getOrCreateUserAccount(userId);
-        return userAccount.isUnlimited ? 'unlimited' : userAccount.imageGenerationTokens;
+        const nextRegeneration = await UserAccounts.checkTokenRegeneration(userId);
+        const tokenCount = userAccount.isUnlimited ? 'unlimited' : userAccount.imageGenerationTokens;
+
+        return {
+            nextRegeneration,
+            tokenCount
+        }
     })
 })
