@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { DetailedHTMLProps, HTMLAttributes, useEffect, useState } from "react";
 import { MdDelete } from "react-icons/md";
 import { type GeneratedImageModel } from "~/server/db/repositories";
 import ImageWithFallback from "./ImageWithFallback";
@@ -14,6 +14,7 @@ import { useLimitedToaster } from "~/hooks/useLimitedToaster";
 import { GENERATED_IMAGE_SIZE } from "~/common/constants";
 import { useBase64BlurHash } from "~/hooks/useBase64BlurHash";
 import { useScrollRestoration } from "~/hooks/useScrollRestoration";
+import { withLongPress } from "./withLongPress";
 
 type GeneratedImageType = Pick<
   GeneratedImageModel,
@@ -28,7 +29,7 @@ export interface GeneratedImageProps {
 export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
   const router = useRouter();
   useScrollRestoration(router);
-  
+
   const [open, setOpen] = useState(false);
   const [displayColors, setDisplayColors] = useState<ImageDisplayColor>();
 
@@ -216,38 +217,55 @@ function PreviewImage({
                 }
               />
 
-              <p
-                className={`lg:max-fit selection-none absolute inset-x-0 -bottom-2 left-1/2 z-50 
-              max-h-12 w-full max-w-[600px] -translate-x-1/2 rotate-1 cursor-pointer overflow-hidden 
-              text-ellipsis whitespace-nowrap rounded-xl p-1 text-center font-mono text-xs
-              leading-7 shadow-lg transition-all duration-200 selection:bg-violet-400
-              selection:text-white hover:max-h-[400px] hover:whitespace-normal sm:p-2 sm:text-sm md:w-5/12
-            `}
-                onClick={(e) => {
-                  navigator.clipboard
-                    .writeText(prompt)
-                    .then(() =>
-                      toast.success("Copied to clipboard", {
-                        id: "clipboard",
-                        icon: "✏️",
-                      })
-                    )
-                    .catch(console.error);
-
-                  e.stopPropagation();
-                }}
-                style={{
-                  backgroundColor: displayColors.bgColor,
-                  color: displayColors.fgColor,
-                }}
-              >
-                {prompt.toLowerCase()}
-              </p>
+              <ImagePrompt prompt={prompt} displayColors={displayColors} />
             </Dialog.Panel>
           </AnimatePresence>
         </Dialog>
       )}
     </AnimatePresence>
+  );
+}
+
+// prettier-ignore
+const P = (props: DetailedHTMLProps<HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>) =>  <p {...props}></p>;
+const LongPressParagraph = withLongPress(P, 1000);
+
+function ImagePrompt({
+  prompt,
+  displayColors,
+}: {
+  prompt: string;
+  displayColors: ImageDisplayColor;
+}) {
+  return (
+    <LongPressParagraph
+      className={`lg:max-fit selection-none absolute inset-x-0 -bottom-2 left-1/2 z-50 
+max-h-12 w-full max-w-[600px] -translate-x-1/2 rotate-1 scale-100 cursor-pointer 
+select-none overflow-hidden text-ellipsis whitespace-nowrap rounded-xl p-1 text-center
+font-mono text-xs leading-7 shadow-lg transition-all duration-200 selection:bg-violet-400 selection:text-white
+hover:max-h-[400px] hover:whitespace-normal active:scale-95 active:brightness-75 sm:p-2 sm:text-sm md:w-5/12
+`}
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+      onLongPress={() => {
+        navigator.clipboard
+          .writeText(prompt)
+          .then(() =>
+            toast.success("Copied to clipboard", {
+              id: "clipboard",
+              icon: "✏️",
+            })
+          )
+          .catch(console.error);
+      }}
+      style={{
+        backgroundColor: displayColors.bgColor,
+        color: displayColors.fgColor,
+      }}
+    >
+      {prompt.toLowerCase()}
+    </LongPressParagraph>
   );
 }
 
