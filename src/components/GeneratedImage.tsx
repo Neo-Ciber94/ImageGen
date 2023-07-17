@@ -18,7 +18,6 @@ import { useRouter } from "next/router";
 import { useLimitedToaster } from "~/hooks/useLimitedToaster";
 import { GENERATED_IMAGE_SIZE } from "~/common/constants";
 import { useBase64BlurHash } from "~/hooks/useBase64BlurHash";
-import { useScrollRestoration } from "~/hooks/useScrollRestoration";
 import { withLongPress } from "./withLongPress";
 
 type GeneratedImageType = Pick<
@@ -33,7 +32,6 @@ export interface GeneratedImageProps {
 
 export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
   const router = useRouter();
-  useScrollRestoration(router);
 
   const [open, setOpen] = useState(false);
   const [displayColors, setDisplayColors] = useState<ImageDisplayColor>();

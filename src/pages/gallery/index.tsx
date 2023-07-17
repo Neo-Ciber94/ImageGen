@@ -203,7 +203,7 @@ export default function GalleryPage() {
           <ScrollToTop />
         </div>
 
-        <div ref={inViewRef}></div>
+        {!isLoading && <div ref={inViewRef}></div>}
       </AnimatedPage>
 
       {!hasNextPage &&
