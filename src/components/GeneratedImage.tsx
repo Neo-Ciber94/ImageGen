@@ -13,6 +13,7 @@ import { useRouter } from "next/router";
 import { useLimitedToaster } from "~/hooks/useLimitedToaster";
 import { GENERATED_IMAGE_SIZE } from "~/common/constants";
 import { useBase64BlurHash } from "~/hooks/useBase64BlurHash";
+import { useScrollRestoration } from "~/hooks/useScrollRestoration";
 
 type GeneratedImageType = Pick<
   GeneratedImageModel,
@@ -26,6 +27,8 @@ export interface GeneratedImageProps {
 
 export default function GeneratedImage({ img, onDelete }: GeneratedImageProps) {
   const router = useRouter();
+  useScrollRestoration(router);
+  
   const [open, setOpen] = useState(false);
   const [displayColors, setDisplayColors] = useState<ImageDisplayColor>();
 
@@ -216,7 +219,7 @@ function PreviewImage({
               <p
                 className={`lg:max-fit selection-none absolute inset-x-0 -bottom-2 left-1/2 z-50 
               max-h-12 w-full max-w-[600px] -translate-x-1/2 rotate-1 cursor-pointer overflow-hidden 
-              text-ellipsis whitespace-nowrap rounded-xl p-0 text-center font-mono text-xs
+              text-ellipsis whitespace-nowrap rounded-xl p-1 text-center font-mono text-xs
               leading-7 shadow-lg transition-all duration-200 selection:bg-violet-400
               selection:text-white hover:max-h-[400px] hover:whitespace-normal sm:p-2 sm:text-sm md:w-5/12
             `}
