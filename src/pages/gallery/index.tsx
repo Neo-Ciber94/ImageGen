@@ -20,6 +20,7 @@ import { FallingLines } from "react-loader-spinner";
 import ScrollToTop from "~/components/ScrollToTop";
 import { useGeneratingImagesCount } from "~/atoms/generatingImageAtom";
 import { drawImageAsBase64 } from "~/utils/drawImageAsBase64";
+import ScrollRestoration from "~/components/ScrollRestoration";
 import Image from "next/image";
 import { NextSeo } from "next-seo";
 
@@ -29,13 +30,16 @@ export const getServerSideProps = () => {
 };
 
 export default function GalleryPage() {
-  const apiContext = api.useContext();
   const setRandomSearchTerm = useSetRandomPrompt();
   const generatingImageCount = useGeneratingImagesCount();
   const isGenerateImageLoading = useIsGeneratingImage();
   const promptText = usePromptText();
-  const search = useDebounce(promptText, 1000);
+  const debouncedSearchText = useDebounce(promptText, 1000);
   const { ref: inViewRef, inView } = useInView();
+  const search =
+    debouncedSearchText.trim().length === 0 || isGenerateImageLoading
+      ? undefined
+      : debouncedSearchText;
 
   const {
     data,
@@ -45,13 +49,7 @@ export default function GalleryPage() {
     isFetchingNextPage,
     fetchNextPage,
   } = api.images.getAll.useInfiniteQuery(
-    {
-      search:
-        search.trim().length === 0 || isGenerateImageLoading
-          ? undefined
-          : search,
-      limit: 10,
-    },
+    { search, limit: 10 },
     {
       getNextPageParam(lastPage) {
         return lastPage.nextCursor;
@@ -65,56 +63,19 @@ export default function GalleryPage() {
   }, [data?.pages]);
 
   useEffect(() => {
-    if (history.scrollRestoration) {
-      history.scrollRestoration = "manual";
-    }
-
-    return () => {
-      history.scrollRestoration = "auto";
-    };
-  }, []);
-
-  useEffect(() => {
     if (inView && hasNextPage) {
       void fetchNextPage();
     }
   }, [fetchNextPage, hasNextPage, inView]);
 
-  const deleteImage = api.images.deleteImage.useMutation();
-
-  const handleDelete = async (id: number) => {
-    const shouldDelete = confirm("Do you want to delete this image?");
-
-    if (!shouldDelete) {
-      return false;
-    }
-
-    const toastPromise = deferred<void>();
-    void toast.promise(toastPromise.promise, {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-      error: (err) => err?.message ?? "Something went wrong",
-      success: "Image deleted successfully",
-      loading: "Deleting...",
-    });
-
-    try {
-      await deleteImage.mutateAsync({ id });
-      await apiContext.images.getAll.invalidate();
-      toastPromise.resolve();
-      return true;
-    } catch (err) {
-      console.error(err);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const trpcError = getTRPCValidationError(err);
-      if (trpcError) {
-        toastPromise.reject(trpcError);
-        return false;
-      }
-
-      toastPromise.reject(err);
-      return false;
-    }
-  };
+  const noMoreImages = useMemo(() => {
+    return (
+      !hasNextPage &&
+      debouncedSearchText.trim().length === 0 &&
+      data &&
+      data.pages.length > 1
+    );
+  }, [data, hasNextPage, debouncedSearchText]);
 
   const placeholderArray = useMemo(
     () => Array.from(Array(generatingImageCount).keys()),
@@ -191,7 +152,6 @@ export default function GalleryPage() {
                           data={data}
                           idx={idx}
                           generatingImageCount={generatingImageCount}
-                          onDelete={() => handleDelete(data.id)}
                         />
                       );
                     })}
@@ -201,6 +161,7 @@ export default function GalleryPage() {
           </div>
         </div>
 
+        {/* Loading indicator */}
         <div className="h-20 w-full p-4 text-center">
           {isFetchingNextPage && !isLoading && (
             <div className="flex flex-row items-center justify-center">
@@ -209,25 +170,28 @@ export default function GalleryPage() {
           )}
         </div>
 
+        {/* Prevent scroll to on url change */}
+        <ScrollRestoration />
+
+        {/* Scroll to top button */}
         <div className="fixed bottom-5 right-5 z-10">
           <ScrollToTop />
         </div>
 
+        {/* Infinite scrolling detector */}
         {!isLoading && <div ref={inViewRef}></div>}
       </AnimatedPage>
 
-      {!hasNextPage &&
-        search.trim().length === 0 &&
-        data &&
-        data.pages.length > 2 && (
-          <div
-            className="flex w-full scale-100 cursor-pointer select-none flex-row items-center justify-center
+      {/* No more images label */}
+      {noMoreImages && (
+        <div
+          className="flex w-full scale-100 cursor-pointer select-none flex-row items-center justify-center
               gap-4 px-4 pb-8 pt-2 text-xl text-violet-500 opacity-30 transition-all duration-300 active:scale-90 sm:text-3xl"
-          >
-            <MdOutlineHideImage className="text-5xl" />
-            <span>No more images here</span>
-          </div>
-        )}
+        >
+          <MdOutlineHideImage className="text-5xl" />
+          <span>No more images here</span>
+        </div>
+      )}
     </>
   );
 }
@@ -242,16 +206,46 @@ interface GalleryImageProps {
   };
   idx: number;
   generatingImageCount: number;
-  onDelete: () => Promise<boolean>;
 }
 
-function GalleryImage({
-  data,
-  idx,
-  generatingImageCount,
-  onDelete,
-}: GalleryImageProps) {
+function GalleryImage({ data, idx, generatingImageCount }: GalleryImageProps) {
   const [visible] = useState(true); // TODO: Animate the exit state
+  const apiContext = api.useContext();
+  const deleteImage = api.images.deleteImage.useMutation();
+
+  const handleDelete = async (id: number) => {
+    const shouldDelete = confirm("Do you want to delete this image?");
+
+    if (!shouldDelete) {
+      return false;
+    }
+
+    const toastPromise = deferred<void>();
+    void toast.promise(toastPromise.promise, {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+      error: (err) => err?.message ?? "Something went wrong",
+      success: "Image deleted successfully",
+      loading: "Deleting...",
+    });
+
+    try {
+      await deleteImage.mutateAsync({ id });
+      await apiContext.images.getAll.invalidate();
+      toastPromise.resolve();
+      return true;
+    } catch (err) {
+      console.error(err);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const trpcError = getTRPCValidationError(err);
+      if (trpcError) {
+        toastPromise.reject(trpcError);
+        return false;
+      }
+
+      toastPromise.reject(err);
+      return false;
+    }
+  };
 
   return (
     <AnimatePresence key={data.id}>
@@ -274,7 +268,7 @@ function GalleryImage({
           <GeneratedImage
             img={data}
             onDelete={async () => {
-              await onDelete();
+              await handleDelete(data.id);
             }}
           />
         </motion.div>
