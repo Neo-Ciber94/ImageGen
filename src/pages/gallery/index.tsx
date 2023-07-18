@@ -209,17 +209,11 @@ interface GalleryImageProps {
 }
 
 function GalleryImage({ data, idx, generatingImageCount }: GalleryImageProps) {
-  const [visible] = useState(true); // TODO: Animate the exit state
+  const [visible, setVisible] = useState(true);
   const apiContext = api.useContext();
   const deleteImage = api.images.deleteImage.useMutation();
 
   const handleDelete = async (id: number) => {
-    const shouldDelete = confirm("Do you want to delete this image?");
-
-    if (!shouldDelete) {
-      return false;
-    }
-
     const toastPromise = deferred<void>();
     void toast.promise(toastPromise.promise, {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
@@ -239,16 +233,20 @@ function GalleryImage({ data, idx, generatingImageCount }: GalleryImageProps) {
       const trpcError = getTRPCValidationError(err);
       if (trpcError) {
         toastPromise.reject(trpcError);
-        return false;
+        return;
       }
 
       toastPromise.reject(err);
-      return false;
     }
   };
 
   return (
-    <AnimatePresence key={data.id}>
+    <AnimatePresence
+      key={data.id}
+      onExitComplete={() => {
+        void handleDelete(data.id);
+      }}
+    >
       {visible && (
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
@@ -268,7 +266,14 @@ function GalleryImage({ data, idx, generatingImageCount }: GalleryImageProps) {
           <GeneratedImage
             img={data}
             onDelete={async () => {
-              await handleDelete(data.id);
+              const shouldDelete = confirm("Do you want to delete this image?");
+
+              if (!shouldDelete) {
+                return;
+              }
+
+              setVisible(false);
+              return Promise.resolve();
             }}
           />
         </motion.div>

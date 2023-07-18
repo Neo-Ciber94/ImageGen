@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "build:standalone": "npx dotenv-cli -v NEXT_OUTPUT=standalone -- next build && ncp ./public ./.next/standalone/public && ncp ./.next/static ./.next/standalone/.next/static",
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
@@ -75,6 +76,7 @@
     "drizzle-kit": "^0.19.3",
     "eslint": "^8.40.0",
     "eslint-config-next": "^13.4.2",
+    "ncp": "^2.0.0",
     "postcss": "^8.4.21",
     "prettier": "^2.8.8",
     "prettier-plugin-tailwindcss": "^0.2.8",
