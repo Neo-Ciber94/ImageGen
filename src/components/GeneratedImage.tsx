@@ -205,7 +205,7 @@ function PreviewImage({
               }}
             >
               <ImageWithFallback
-                className="h-auto w-full max-w-[512px]"
+                className="h-auto w-full max-w-[512px] md:max-w-[1024px]"
                 width={0}
                 height={0}
                 sizes="100vw"
