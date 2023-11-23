@@ -1,0 +1,29 @@
+name: Scheduled Health Check
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 */5 * *" # each 5 days
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+
+    env:
+      HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+      HEALTHCHECK_TOKEN: ${{ secrets.HEALTHCHECK_TOKEN }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run Health Check
+        run: tsx scripts/check.ts
