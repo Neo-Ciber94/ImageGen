@@ -23,7 +23,7 @@ jobs:
           node-version: "18"
 
       - name: Install Dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: Run Health Check
         run: tsx scripts/check.ts
