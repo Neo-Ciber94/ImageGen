@@ -6,7 +6,7 @@ import { clerkClient } from "@clerk/nextjs";
 import dayjs from 'dayjs';
 import { TOKEN_REGENERATION_COUNT, TOKEN_REGENERATION_DAYS } from "~/common/constants";
 
-export const DEFAULT_USER_TOKEN_COUNT = 20;
+export const DEFAULT_USER_TOKEN_COUNT = 10;
 
 export type GeneratedImageModel = InferModel<typeof generatedImages>;
 
