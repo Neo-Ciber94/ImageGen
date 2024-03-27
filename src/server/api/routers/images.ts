@@ -219,10 +219,12 @@ export const imagesRouter = createTRPCRouter({
           throw err;
         }
 
+        const isDev = process.env.NODE_ENV !== "production";
         const message =
-          err instanceof Error
+          isDev && err instanceof Error
             ? err.message
             : err?.toString() ?? "Something went wrong";
+
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           cause: err,
