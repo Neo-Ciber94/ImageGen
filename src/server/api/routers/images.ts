@@ -158,7 +158,7 @@ export const imagesRouter = createTRPCRouter({
         const message =
           isDev && err instanceof Error
             ? err.message
-            : err?.toString() ?? "Something went wrong";
+            : "Something went wrong";
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -223,7 +223,7 @@ export const imagesRouter = createTRPCRouter({
         const message =
           isDev && err instanceof Error
             ? err.message
-            : err?.toString() ?? "Something went wrong";
+            : "Something went wrong";
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
