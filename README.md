@@ -4,8 +4,6 @@
 
 An AI image generator gallery.
 
-> Website: <https://du8ecttu3enax.cloudfront.net/>
-
 ## Features
 
 - [x] Generate Images using AI
